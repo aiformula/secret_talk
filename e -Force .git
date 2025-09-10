@@ -1,0 +1,2 @@
+[33m7ba7791[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m Remove .env files and add .gitignore to protect sensitive data
+[33m83f1eed[m Initial commit: Add all project files for secret_talk repository

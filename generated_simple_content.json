@@ -1,0 +1,8 @@
+{
+  "標題": "生成失敗",
+  "內容": "錯誤：object ChatCompletion can't be used in 'await' expression",
+  "結論": "點算好？",
+  "原始概念": "幾時有robot可以幫我條仔含 日日都逼我含 黎m起碼都要日日幫佢含 唔射唔走得",
+  "生成方法": "story_ideas.txt 天條第一誡",
+  "錯誤": "object ChatCompletion can't be used in 'await' expression"
+}
