@@ -1,107 +1,107 @@
-# 🎭 Relationship Content Generator
+# 🎭 Secret Talk - 感情故事生成器
 
-A sophisticated AI-powered system that generates relationship story content for social media platforms like Dcard, with automatic perspective detection and dynamic visual generation.
+一個先進嘅 AI 驅動系統，專門為社交媒體平台（如 Dcard）生成感情故事內容，具備自動視角檢測同動態視覺生成功能。
 
-## 📋 Overview
+## 📋 系統概覽
 
-This system automatically creates engaging relationship stories from simple text inputs, generating:
-- **Compelling titles** with keyword highlighting
-- **Multi-part story content** with emotional depth
-- **Thoughtful conclusions** that encourage discussion
-- **Instagram captions** with hashtags
-- **Beautiful image sets** with perspective-appropriate backgrounds
-- **Telegram auto-posting** for immediate sharing
+呢個系統可以自動將簡單嘅文字輸入轉換成引人入勝嘅感情故事，生成：
+- **吸引人嘅標題** 配關鍵詞高亮顯示
+- **多部分故事內容** 具備情感深度
+- **發人深省嘅結論** 鼓勵討論
+- **Instagram 標題** 配相關標籤
+- **精美圖片集** 配合視角適當嘅背景
+- **Telegram 自動發佈** 即時分享
 
-## 🆕 New: story_ideas.txt 天條第一誡 (The Unbreakable Command)
+## 🆕 最新功能：story_ideas.txt 天條第一誡
 
-We now follow the **story_ideas.txt** template with the **天條第一誡** (The Unbreakable Command) - ensuring 100% adherence to your story concept:
+我哋而家跟足 **story_ideas.txt** 模板同 **天條第一誡**，確保 100% 遵循你嘅故事概念：
 
-### 🎯 天條第一誡 Structure:
-1. **❗ 天條第一誡** - 100% absolute adherence to your story concept
-2. **角色扮演指令** - 23-year-old female, 3 AM, fragmented thoughts
-3. **展示，唔好解釋** - Show, don't tell principle with examples
-4. **風格學習** - Follow the golden style example exactly
-5. **禁止事項** - Strict rules about what not to do
+### 🎯 天條第一誡結構：
+1. **❗ 天條第一誡** - 100% 絕對遵循你嘅故事概念
+2. **角色扮演指令** - 23歲女性，凌晨3點，思緒破碎
+3. **展示，唔好解釋** - 用細節展示，唔好直接解釋
+4. **風格學習** - 完全跟足黃金風格範例
+5. **禁止事項** - 嚴格規定 AI 唔可以做咩
 
-### ✅ Key Features:
-- **絕對服從** - 100% follow your story concept, no additions, no changes
-- **角色扮演** - 23-year-old female at 3 AM with confused thoughts
-- **展示唔好解釋** - Show emotions through details, not explanations
-- **香港口語** - Natural Cantonese with English mixed in (final year, check 電話, IG story)
-- **黃金風格範例** - Follow the exact style template provided
-- **嚴格禁止** - Clear rules about what AI cannot do
+### ✅ 主要特色：
+- **絕對服從** - 100% 跟足你嘅故事概念，唔加嘢，唔改嘢
+- **角色扮演** - 23歲女性凌晨3點嘅混亂思緒
+- **展示唔好解釋** - 用細節展示情感，唔係直接解釋
+- **香港口語** - 自然嘅廣東話夾雜英文（final year、check 電話、IG story）
+- **黃金風格範例** - 跟足提供嘅風格模板
+- **嚴格禁止** - 清楚規定 AI 唔可以做嘅事
 
-### 🌍 Regional Support & Mock Mode:
-- **OpenAI API Available**: Full AI-powered story generation
-- **OpenAI API Restricted**: Automatic fallback to Mock/Demo mode
-- **Mock Mode Features**: Pre-written authentic Hong Kong style stories that match your story concept
-- **Seamless Experience**: System automatically detects API availability and switches modes
-- **📖 Detailed Guide**: See [REGIONAL_SUPPORT.md](REGIONAL_SUPPORT.md) for complete documentation
+### 🌍 地區支援同模擬模式：
+- **OpenAI API 可用**：完整 AI 驅動故事生成
+- **OpenAI API 受限**：自動切換到模擬/示範模式
+- **模擬模式功能**：預寫嘅正宗香港風格故事，符合你嘅故事概念
+- **無縫體驗**：系統自動檢測 API 可用性並切換模式
+- **📖 詳細指南**：睇 [REGIONAL_SUPPORT.md](REGIONAL_SUPPORT.md) 獲取完整文檔
 
-### 🚀 Usage:
+### 🚀 使用方法：
 
-#### Command Line:
+#### 命令行使用：
 ```bash
-# Use simple generator with default story
+# 使用簡單生成器配默認故事
 python relationship_main.py simple
 
-# Use with custom story concept
-python relationship_main.py simple "Your story concept here..."
+# 使用自定義故事概念
+python relationship_main.py simple "你嘅故事概念..."
 
-# Test with story_ideas.txt template
+# 測試 story_ideas.txt 模板
 python test_simple_generator.py
 
-# Test with specific story concept
+# 測試特定故事概念
 python test_simple_with_story_concept.py
 
-# Test Mock mode specifically
+# 專門測試模擬模式
 python test_mock_mode.py
 ```
 
-#### Interactive Mode:
+#### 互動模式：
 ```bash
 python relationship_main.py
-# Then choose option 3 for story_ideas.txt 天條第一誡
+# 然後選擇選項 3：story_ideas.txt 天條第一誡
 ```
 
-### 📋 JSON Output Format:
+### 📋 JSON 輸出格式：
 ```json
 {
   "標題": "[6-12字標題，要吸引人]",
   "內容": "[完整故事，跟足黃金風格範例，150-200字]",
   "結論": "[簡短問句，問大家意見，6-10字]",
-  "原始概念": "Your original story concept",
+  "原始概念": "你嘅原始故事概念",
   "生成方法": "story_ideas.txt 天條第一誡"
 }
 ```
 
-### 🛡️ Mock Mode (For Restricted Regions):
+### 🛡️ 模擬模式（適用於受限地區）：
 ```json
 {
-  "標題": "[Authentic Hong Kong style title]",
-  "內容": "[Pre-written story following story_ideas.txt template]",
-  "結論": "[Natural conclusion question]",
-  "原始概念": "Your original story concept",
-  "生成方法": "Mock/Demo Mode (OpenAI API 不可用)",
-  "說明": "這是示範模式的回應，因為 OpenAI API 在您的地區不可用",
+  "標題": "[正宗香港風格標題]",
+  "內容": "[預寫故事跟足 story_ideas.txt 模板]",
+  "結論": "[自然結論問題]",
+  "原始概念": "你嘅原始故事概念",
+  "生成方法": "模擬/示範模式（OpenAI API 不可用）",
+  "說明": "呢個係示範模式嘅回應，因為 OpenAI API 喺你嘅地區不可用",
   "建議": "如需使用真實 AI 生成，請嘗試使用 VPN 或其他 AI 服務"
 }
 ```
 
-## 📝 NEW: 自定義故事圖片生成 (Custom Story Image Generation)
+## 📝 最新功能：自定義故事圖片生成
 
-We now support **自定義故事內容生成** (Custom Story Content Generation) where you can use your own story content without any modifications!
+我哋而家支援 **自定義故事內容生成**，你可以使用自己嘅故事內容而唔需要任何修改！
 
-### 🎯 Feature Overview:
-- ✅ **原文不變** - Uses your exact text without any modifications
-- ✅ **自動分割** - Intelligently splits your story into title, content, and conclusion
-- ✅ **專業圖片** - Generates 6 professional images from your content
-- ✅ **Telegram 發送** - Automatically uploads to your Telegram
+### 🎯 功能概覽：
+- ✅ **原文不變** - 使用你嘅原文，完全唔修改
+- ✅ **自動分割** - 智能將你嘅故事分割成標題、內容同結論
+- ✅ **專業圖片** - 從你嘅內容生成 6 張專業圖片
+- ✅ **Telegram 發送** - 自動上傳到你嘅 Telegram
 
-### 🚀 How to Use:
+### 🚀 使用方法：
 
-#### Step 1: Edit Your Story File
-Edit `my_custom_story.txt`:
+#### 第一步：編輯你嘅故事檔案
+編輯 `my_custom_story.txt`：
 ```
 你嘅標題（第一行）
 
@@ -112,74 +112,74 @@ Edit `my_custom_story.txt`:
 你嘅結尾問句（最後一行）
 ```
 
-#### Step 2: Run the System
+#### 第二步：運行系統
 ```bash
 python relationship_main.py
-# Choose option 6: 自定義故事圖片生成
+# 選擇選項 6：自定義故事圖片生成
 ```
 
-#### Step 3: Generated Output
-- 📰 **Title Image**: Uses your title
-- 📄 **Content Images**: 3 images with your content automatically split
-- ❓ **Conclusion Image**: Your ending question
-- 🎨 **End Image**: Standard closing image
+#### 第三步：生成輸出
+- 📰 **標題圖片**：使用你嘅標題
+- 📄 **內容圖片**：3 張圖片，自動分割你嘅內容
+- ❓ **結論圖片**：你嘅結尾問題
+- 🎨 **結束圖片**：標準結尾圖片
 
-### 📁 Generated Files:
+### 📁 生成檔案：
 ```
-title.png              # Your title
-content_page1.png       # First part of your content
-content_page2.png       # Second part of your content  
-content_page3.png       # Third part of your content
-conclusion.png          # Your conclusion
-end.png                # Standard ending
+title.png              # 你嘅標題
+content_page1.png       # 你內容嘅第一部分
+content_page2.png       # 你內容嘅第二部分  
+content_page3.png       # 你內容嘅第三部分
+conclusion.png          # 你嘅結論
+end.png                # 標準結尾
 ```
 
-### 🧪 Testing:
+### 🧪 測試：
 ```bash
 python test_custom_story.py
 ```
 
-### 📖 Complete Guide:
-See [CUSTOM_STORY_GUIDE.md](CUSTOM_STORY_GUIDE.md) for detailed instructions and examples.
+### 📖 完整指南：
+睇 [CUSTOM_STORY_GUIDE.md](CUSTOM_STORY_GUIDE.md) 獲取詳細說明同例子。
 
-## 🏗️ System Architecture
+## 🏗️ 系統架構
 
-### Core Files Structure
-
-```
-├── story_ideas.txt                    # Input stories with perspective markers
-├── my_custom_story.txt                # NEW: Custom story input file
-├── relationship_main.py               # Main execution orchestrator
-├── relationship_content_generator.py  # AI content generation engine
-├── simple_story_generator.py         # NEW: Super simple story generator
-├── custom_story_reader.py            # NEW: Custom story reader and processor
-├── test_simple_generator.py          # NEW: Simple generator testing script
-├── test_custom_story.py              # NEW: Custom story testing script
-├── relationship_template_generator.py # HTML template creator
-├── image_generator.py                # PNG image generator
-├── telegram_sender.py                # Telegram posting automation
-├── config.py                         # Environment setup
-├── CUSTOM_STORY_GUIDE.md             # NEW: Complete custom story guide
-└── generated_ig_caption.txt          # Output Instagram caption
-```
-
-### Generated Output Files
+### 核心檔案結構
 
 ```
-├── title.png           # Main title slide
-├── content_page1.png   # Story part 1
-├── content_page2.png   # Story part 2
-├── content_page3.png   # Story part 3
-├── conclusion.png      # Conclusion slide
-├── end.png            # Ending slide
-└── generated_simple_content.json     # NEW: Simple generator output
+├── story_ideas.txt                    # 輸入故事配視角標記
+├── my_custom_story.txt                # 最新：自定義故事輸入檔案
+├── relationship_main.py               # 主要執行協調器
+├── relationship_content_generator.py  # AI 內容生成引擎
+├── simple_story_generator.py         # 最新：超簡單故事生成器
+├── custom_story_reader.py            # 最新：自定義故事讀取器同處理器
+├── test_simple_generator.py          # 最新：簡單生成器測試腳本
+├── test_custom_story.py              # 最新：自定義故事測試腳本
+├── relationship_template_generator.py # HTML 模板創建器
+├── image_generator.py                # PNG 圖片生成器
+├── telegram_sender.py                # Telegram 發佈自動化
+├── config.py                         # 環境設置
+├── CUSTOM_STORY_GUIDE.md             # 最新：完整自定義故事指南
+└── generated_ig_caption.txt          # 輸出 Instagram 標題
 ```
 
-## 🎯 Complete Workflow
+### 生成輸出檔案
 
-### 1. Story Input & Perspective Detection
+```
+├── title.png           # 主標題幻燈片
+├── content_page1.png   # 故事第一部分
+├── content_page2.png   # 故事第二部分
+├── content_page3.png   # 故事第三部分
+├── conclusion.png      # 結論幻燈片
+├── end.png            # 結尾幻燈片
+└── generated_simple_content.json     # 最新：簡單生成器輸出
+```
 
-**Input**: `story_ideas.txt`
+## 🎯 完整工作流程
+
+### 1. 故事輸入同視角檢測
+
+**輸入**：`story_ideas.txt`
 ```
 # 感情故事概念 - 女性第一人稱視角
 我沉迷社交媒體，日日都要影相打卡...
@@ -188,15 +188,15 @@ See [CUSTOM_STORY_GUIDE.md](CUSTOM_STORY_GUIDE.md) for detailed instructions and
 我女朋友網購成癮，每日都要買嘢...
 ```
 
-**Detection Logic**:
-- System scans for perspective markers in comments
-- `女性第一人稱視角` → Sets perspective to "female"
-- `男性第一人稱視角` → Sets perspective to "male"
-- Stories inherit the perspective from their section
+**檢測邏輯**：
+- 系統掃描註釋中嘅視角標記
+- `女性第一人稱視角` → 設置視角為 "female"
+- `男性第一人稱視角` → 設置視角為 "male"
+- 故事繼承佢哋所屬部分嘅視角
 
-### 2. AI Content Generation Pipeline
+### 2. AI 內容生成流水線
 
-#### Traditional Method:
+#### 傳統方法：
 
 ##### Phase 1: Title Generation
 ```python
@@ -316,59 +316,59 @@ telegram_sender.py
 - **Timing Optimization**: Peak audience engagement
 - **Visual Consistency**: Brand-aligned image generation
 
-## 🛠️ Setup and Configuration
+## 🛠️ 設置同配置
 
-### Prerequisites
+### 先決條件
 ```bash
 pip install openai python-dotenv imgkit asyncio pathlib requests
 ```
 
-### Environment Variables
+### 環境變數
 ```bash
-OPENAI_API_KEY=your_openai_api_key
-TELEGRAM_BOT_TOKEN=your_telegram_bot_token
-TELEGRAM_CHAT_ID=your_telegram_chat_id
+OPENAI_API_KEY=你嘅_openai_api_key
+TELEGRAM_BOT_TOKEN=你嘅_telegram_bot_token
+TELEGRAM_CHAT_ID=你嘅_telegram_chat_id
 ```
 
-### System Dependencies
-- **wkhtmltoimage**: For HTML to PNG conversion
-- **Font Files**: Chinese font support required
+### 系統依賴
+- **wkhtmltoimage**：用於 HTML 轉 PNG 轉換
+- **字體檔案**：需要中文字體支援
 
-## 🚀 Usage Examples
+## 🚀 使用例子
 
-### Quick Start (Simple Mode)
+### 快速開始（簡單模式）
 ```bash
-# Interactive mode with menu
+# 互動模式配選單
 python relationship_main.py
 
-# Direct simple generator usage
+# 直接使用簡單生成器
 python relationship_main.py simple "我男朋友成日打機..."
 
-# Test with story_ideas.txt template
+# 使用 story_ideas.txt 模板測試
 python test_simple_generator.py
 
-# Test with specific story concept
+# 使用特定故事概念測試
 python test_simple_with_story_concept.py
 ```
 
-### Traditional Full Generation
+### 傳統完整生成
 ```bash
-# Complete pipeline with images
+# 完整流水線配圖片
 python relationship_main.py
 
-# Short content only
+# 只生成短內容
 python relationship_main.py short
 
-# Performance analysis
+# 性能分析
 python relationship_main.py report
 ```
 
-### Advanced Usage
+### 進階使用
 ```bash
-# Interactive testing
+# 互動測試
 python test_simple_generator.py interactive
 
-# Batch testing with examples
+# 批量測試配例子
 python test_simple_generator.py
 ```
 
