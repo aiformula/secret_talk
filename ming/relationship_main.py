@@ -661,9 +661,12 @@ async def generate_custom_story_content():
     # 初始化環境變量
     try:
         clients = setup_environment()
+        print("✅ 環境變數設置成功，將會發送到 Telegram")
     except Exception as e:
         print(f"⚠️ 環境初始化錯誤：{e}")
         print("📝 將跳過 Telegram 發送，只生成圖片")
+        print("💡 如需發送到 Telegram，請參考：ming/TELEGRAM_SETUP_GUIDE.md")
+        print("🔧 或者手動創建 ming/.env 檔案並填入你嘅 API keys")
         clients = None
     
     # 顯示使用說明
@@ -824,6 +827,8 @@ async def generate_custom_story_with_file(filename):
                 print("✅ 已發送到 Telegram")
             else:
                 print("⚠️ 跳過 Telegram 發送（環境變量未設置）")
+                print("💡 如需發送到 Telegram，請參考：ming/TELEGRAM_SETUP_GUIDE.md")
+                print("🔧 創建 ming/.env 檔案並填入你嘅 Telegram Bot Token 同 Chat ID")
                 
             # 生成 Instagram 標題並保存
             print("\n=== 📱 生成 Instagram 標題 ===")
