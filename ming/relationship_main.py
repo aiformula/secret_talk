@@ -769,34 +769,35 @@ async def generate_custom_story_with_file(filename):
         
         # 生成 HTML 模板（使用原文不變模板）
         print(f"\n=== 🎨 生成 HTML 模板（100% 原文保留，{perspective} 視角） ===")
+        # 動態生成模板，支援不同數量嘅內容頁
         templates = {
             'title': generate_exact_custom_template(
                 story_data['title'], 
                 template_type="title",
                 perspective=perspective
-            ),
-            'story1': generate_exact_custom_template(
-                story_data['content_parts'][0] if story_data['content_parts'][0] else "【第一部分內容】", 
-                template_type="content",
-                perspective=perspective
-            ),
-            'story2': generate_exact_custom_template(
-                story_data['content_parts'][1] if story_data['content_parts'][1] else "【第二部分內容】", 
-                template_type="content",
-                perspective=perspective
-            ),
-            'story3': generate_exact_custom_template(
-                story_data['content_parts'][2] if story_data['content_parts'][2] else "【第三部分內容】", 
-                template_type="content",
-                perspective=perspective
-            ),
+            )
+        }
+        
+        # 動態添加內容頁
+        content_parts = story_data['content_parts']
+        for i, part in enumerate(content_parts):
+            if part.strip():  # 只添加非空內容
+                story_key = f'story{i+1}'
+                templates[story_key] = generate_exact_custom_template(
+                    part, 
+                    template_type="content",
+                    perspective=perspective
+                )
+        
+        # 添加結論和結束頁
+        templates.update({
             'conclusion': generate_exact_custom_template(
                 story_data['conclusion'], 
                 template_type="conclusion",
                 perspective=perspective
             ),
             'end': generate_relationship_end_template(perspective=perspective)
-        }
+        })
         
         # 生成圖片
         print("\n=== 🖼️ 生成圖片 ===")

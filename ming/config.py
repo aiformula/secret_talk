@@ -86,8 +86,24 @@ def setup_environment():
 
     # Initialize clients with the final values
     notion = Client(auth=notion_token)
-    openai_client = AsyncOpenAI(api_key=openai_api_key)
-    telegram_bot = Bot(token=telegram_bot_token)
+    try:
+        openai_client = AsyncOpenAI(api_key=openai_api_key)
+    except Exception as e:
+        print(f"⚠️ AsyncOpenAI 初始化錯誤: {e}")
+        # Try with basic OpenAI client instead
+        from openai import OpenAI
+        openai_client = OpenAI(api_key=openai_api_key)
+        print("✅ 使用基本 OpenAI 客戶端")
+    
+    try:
+        telegram_bot = Bot(token=telegram_bot_token)
+        print("✅ Telegram Bot 初始化成功")
+    except Exception as e:
+        print(f"⚠️ Telegram Bot 初始化錯誤: {e}")
+        print("🔧 嘗試使用簡化配置...")
+        # Create a minimal bot instance
+        telegram_bot = None
+        print("⚠️ Telegram 功能暫時不可用，但圖片生成正常")
 
     print("\nClients initialized with new values!")
     print(f"Using Telegram Chat ID: {telegram_chat_id}")

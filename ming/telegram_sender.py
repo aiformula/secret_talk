@@ -1,4 +1,5 @@
 import os
+import asyncio
 from telegram import InputMediaPhoto
 
 def check_file_sizes(photo_paths):
@@ -29,6 +30,11 @@ def check_file_sizes(photo_paths):
 async def send_telegram_photos(telegram_bot, telegram_chat_id, photo_paths: list, caption: str = None):
     """Send multiple photos to Telegram with a single caption."""
     try:
+        # Check if telegram_bot is available
+        if telegram_bot is None:
+            print("⚠️ Telegram Bot 不可用，跳過發送")
+            return False
+            
         # Check if all files exist
         for path in photo_paths:
             if not os.path.exists(path):
@@ -63,15 +69,49 @@ async def send_telegram_photos(telegram_bot, telegram_chat_id, photo_paths: list
             
         print(f"⏱️  設定超時時間: {read_timeout} 秒 (基於檔案大小 {total_size:.1f}MB)")
         
-        result = await telegram_bot.send_media_group(
-            chat_id=telegram_chat_id,
-            media=media,
-            caption=caption,
-            read_timeout=read_timeout,
-            write_timeout=write_timeout,
-            connect_timeout=30
-        )
-        print(f"✅ 成功發送 {len(photo_paths)} 張圖片到 Telegram！")
+        # Telegram album 限制最多10張圖片，需要分批發送
+        max_photos_per_album = 10
+        
+        if len(media) <= max_photos_per_album:
+            # 如果圖片數量在限制內，正常發送
+            result = await telegram_bot.send_media_group(
+                chat_id=telegram_chat_id,
+                media=media,
+                caption=caption,
+                read_timeout=read_timeout,
+                write_timeout=write_timeout,
+                connect_timeout=30
+            )
+            print(f"✅ 成功發送 {len(photo_paths)} 張圖片到 Telegram！")
+        else:
+            # 分批發送
+            print(f"📦 圖片數量 ({len(media)}) 超過 Telegram 限制，將分批發送...")
+            
+            for i in range(0, len(media), max_photos_per_album):
+                batch_media = media[i:i + max_photos_per_album]
+                batch_num = (i // max_photos_per_album) + 1
+                total_batches = (len(media) + max_photos_per_album - 1) // max_photos_per_album
+                
+                # 只有第一批才加 caption
+                batch_caption = caption if i == 0 else None
+                
+                print(f"📤 發送第 {batch_num}/{total_batches} 批 ({len(batch_media)} 張圖片)...")
+                
+                result = await telegram_bot.send_media_group(
+                    chat_id=telegram_chat_id,
+                    media=batch_media,
+                    caption=batch_caption,
+                    read_timeout=read_timeout,
+                    write_timeout=write_timeout,
+                    connect_timeout=30
+                )
+                
+                # 批次間稍微延遲，避免速率限制
+                if i + max_photos_per_album < len(media):
+                    await asyncio.sleep(1)
+            
+            print(f"✅ 成功分批發送 {len(photo_paths)} 張圖片到 Telegram！")
+        
         return True
         
     except Exception as e:

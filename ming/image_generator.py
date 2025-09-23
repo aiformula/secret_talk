@@ -10,15 +10,20 @@ async def generate_images_from_templates(templates, person):
     # Store all generated PNG paths
     png_paths = []
     
-    # Define the mapping from template names to PNG file names
-    template_to_png_name = {
-        'title': 'title.png',
-        'story1': 'content_page1.png',
-        'story2': 'content_page2.png', 
-        'story3': 'content_page3.png',
-        'conclusion': 'conclusion.png',
-        'end': 'end.png'
-    }
+    # Define the mapping from template names to PNG file names (dynamic)
+    def get_png_name(template_name):
+        if template_name == 'title':
+            return 'title.png'
+        elif template_name.startswith('story'):
+            # Extract story number and create corresponding content page name
+            story_num = template_name.replace('story', '')
+            return f'content_page{story_num}.png'
+        elif template_name == 'conclusion':
+            return 'conclusion.png'
+        elif template_name == 'end':
+            return 'end.png'
+        else:
+            return f'{template_name}.png'
     
     async with async_playwright() as p:
         # Launch browser with specific viewport size
@@ -60,8 +65,8 @@ async def generate_images_from_templates(templates, person):
                     # Ensure element is visible
                     await post_element.scroll_into_view_if_needed()
                     
-                    # Get the PNG file name from mapping, fallback to template_name if not found
-                    png_filename = template_to_png_name.get(template_name, f"{template_name}.png")
+                    # Get the PNG file name using dynamic function
+                    png_filename = get_png_name(template_name)
                     png_path = os.path.join(current_dir, png_filename)
                     
                     await post_element.screenshot(

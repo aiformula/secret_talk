@@ -15,14 +15,14 @@ def generate_exact_custom_template(content, template_type="content", perspective
     # Adjust font size based on content length for better fit
     content_length = len(content)
     if template_type == "content" and content_length > 200:
-        font_size = "28px"  # Smaller for longer content
+        font_size = "42px"  # Further increased for better readability
     elif template_type == "content" and content_length > 150:
-        font_size = "30px"  # Medium for medium content
+        font_size = "44px"  # Further increased for better readability
     
     # Choose styling based on template type with proper sizing for mobile display
     if template_type == "title":
         bg_image = "content_page1_girl.png" if perspective == "female" else "content_page1_boy.png"
-        font_size = "52px"  # Reduced from 78px
+        font_size = "82px"  # Increased by 20% from 52px
         font_weight = "900"
         color = "#3f3257"
         content_class = "title"
@@ -34,14 +34,14 @@ def generate_exact_custom_template(content, template_type="content", perspective
         """
     elif template_type == "conclusion":
         bg_image = "content_page1_girl.png" if perspective == "female" else "content_page1_boy.png"
-        font_size = "36px"  # Reduced from 42px
+        font_size = "53px"  # Increased by 20% from 36px
         font_weight = "700"
         color = "#8B4B91"
         content_class = "question"
         extra_style = "text-align: center;"
     else:  # content pages
         bg_image = "content_page1_girl.png" if perspective == "female" else "content_page1_boy.png"
-        font_size = "32px"  # Reduced from 46px
+        font_size = "46px"  # Further increased for better readability
         font_weight = "500"
         color = "#3f3257"
         content_class = "story-content"
@@ -59,7 +59,7 @@ def generate_exact_custom_template(content, template_type="content", perspective
             
             #xiaohongshu-post {{
                 margin: 0;
-                padding: 60px 40px;
+                padding: 30px 20px;
                 width: 1080px;
                 height: 1350px;
                 background: url('https://raw.githubusercontent.com/Liuhangfung/secret_talk/main/{bg_image}') center center/cover no-repeat;
@@ -70,19 +70,20 @@ def generate_exact_custom_template(content, template_type="content", perspective
                 align-items: center;
                 position: relative;
                 box-sizing: border-box;
-                overflow: hidden;
+                overflow: visible;
             }}
             
             .container {{
-                width: 90%;
-                max-width: 900px;
+                width: 100%;
+                max-width: 1040px;
                 display: flex;
                 justify-content: center;
                 align-items: center;
                 z-index: 2;
                 position: relative;
-                padding: 20px;
+                padding: 5px;
                 box-sizing: border-box;
+                min-height: auto;
             }}
             
             .{content_class} {{
@@ -97,13 +98,14 @@ def generate_exact_custom_template(content, template_type="content", perspective
                 word-wrap: break-word;
                 overflow-wrap: break-word;
                 hyphens: auto;
-                max-width: 800px;
+                max-width: 980px;
                 width: 100%;
-                padding: 25px;
+                padding: 12px;
                 box-sizing: border-box;
                 background: rgba(255, 255, 255, 0.1);
                 border-radius: 15px;
                 backdrop-filter: blur(5px);
+                margin: auto;
             }}
         </style>
     </head>
