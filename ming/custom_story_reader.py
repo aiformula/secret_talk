@@ -208,38 +208,131 @@ def split_content_for_images(content, target_parts=3):
             parts.append("")
         return parts[:target_parts]
     
-    # 如果段落太多，需要合併
-    total_chars = sum(len(p) for p in paragraphs)
-    chars_per_part = total_chars // target_parts
+    # 計算每個段落嘅字數
+    paragraph_lengths = [len(p) for p in paragraphs]
+    total_chars = sum(paragraph_lengths)
+    
+    # 設定每頁最佳字數範圍（進一步減少以確保文字不會被截斷）
+    optimal_chars_per_page = 45   # 適合顯示區域的每頁字數（進一步減少到45字）
+    max_chars_per_page = 60       # 最大字數，確保不會溢出（減少到60字）
+    min_chars_per_page = 30       # 最小字數，避免頁面太空
     
     parts = []
     current_part = []
     current_chars = 0
     
-    for paragraph in paragraphs:
-        current_part.append(paragraph)
-        current_chars += len(paragraph)
+    for i, paragraph in enumerate(paragraphs):
+        paragraph_len = paragraph_lengths[i]
         
-        # 如果當前部分夠長，或者已經係最後一部分
-        if (current_chars >= chars_per_part and len(parts) < target_parts - 1) or len(parts) == target_parts - 1:
-            parts.append('\n\n'.join(current_part))
-            current_part = []
-            current_chars = 0
+        # 如果單個段落太長，嘗試按句子分割（但保留完整內容）
+        if paragraph_len > max_chars_per_page:
+            # 按句子分割長段落，保留所有標點符號
+            sentences = []
+            temp_sentence = ""
+            for char in paragraph:
+                temp_sentence += char
+                if char in ['。', '！', '？', '；']:
+                    if temp_sentence.strip():
+                        sentences.append(temp_sentence.strip())
+                    temp_sentence = ""
+            # 加入剩餘內容
+            if temp_sentence.strip():
+                sentences.append(temp_sentence.strip())
+            
+            for sentence in sentences:
+                sentence_len = len(sentence)
+                
+                # 如果加入呢句會超過最大字數，完成當前部分
+                if current_part and (current_chars + sentence_len > max_chars_per_page):
+                    parts.append('\n\n'.join(current_part))
+                    current_part = [sentence]
+                    current_chars = sentence_len
+                else:
+                    current_part.append(sentence)
+                    current_chars += sentence_len
+                
+                # 如果達到最佳長度就分頁
+                if current_chars >= optimal_chars_per_page:
+                    parts.append('\n\n'.join(current_part))
+                    current_part = []
+                    current_chars = 0
+        else:
+            # 正常處理短段落
+            # 如果加入呢個段落會超過最大字數，而且當前部分已經有內容
+            if current_part and (current_chars + paragraph_len > max_chars_per_page):
+                # 完成當前部分
+                parts.append('\n\n'.join(current_part))
+                current_part = [paragraph]
+                current_chars = paragraph_len
+            else:
+                # 加入當前段落
+                current_part.append(paragraph)
+                current_chars += paragraph_len
+            
+            # 更積極嘅分頁：如果當前部分達到最佳長度就分頁
+            if (current_chars >= optimal_chars_per_page and 
+                i < len(paragraphs) - 1):
+                parts.append('\n\n'.join(current_part))
+                current_part = []
+                current_chars = 0
     
     # 處理剩餘內容
     if current_part:
-        if parts:
-            # 如果已經有部分，將剩餘內容加到最後一部分
-            parts[-1] += '\n\n' + '\n\n'.join(current_part)
-        else:
-            # 如果冇部分，直接作為一部分
-            parts.append('\n\n'.join(current_part))
+        remaining_content = '\n\n'.join(current_part)
+        
+        # 總是保留剩餘內容，唔好合併（確保內容完整）
+        parts.append(remaining_content)
     
-    # 確保有足夠嘅部分
+    # 確保有足夠嘅部分，但唔好加空字符串（會產生空白頁）
     while len(parts) < target_parts:
+        if parts:
+            # 如果最後一部分太短，唔加新部分
+            if len(parts[-1]) < min_chars_per_page * 2:
+                break
         parts.append("")
     
-    return parts[:target_parts]
+    # 移除空白部分
+    parts = [part for part in parts if part.strip()]
+    
+    # 控制總圖片數量少於10張（包括標題、結論、結尾圖片）
+    target_max_parts = 6  # 目標最多6個內容頁（加上標題、結論、結尾頁，總共9張圖片）
+    
+    # 如果分割後部分太多，智能合併
+    while len(parts) > target_max_parts:
+        print(f"📄 內容分割成 {len(parts)} 頁，正在優化到 {target_max_parts} 頁以內...")
+        
+        # 搵最短嘅兩個相鄰部分合併
+        min_combined_length = float('inf')
+        merge_index = -1
+        
+        for i in range(len(parts) - 1):
+            combined_length = len(parts[i]) + len(parts[i + 1])
+            if combined_length < min_combined_length and combined_length <= max_chars_per_page * 1.5:
+                min_combined_length = combined_length
+                merge_index = i
+        
+        # 如果搵到合適嘅合併位置
+        if merge_index != -1:
+            # 合併兩個部分
+            parts[merge_index] = parts[merge_index] + '\n\n' + parts[merge_index + 1]
+            parts.pop(merge_index + 1)
+        else:
+            # 如果搵唔到合適嘅合併，強制合併最短嘅兩個相鄰部分
+            shortest_pair_index = 0
+            shortest_pair_length = len(parts[0]) + len(parts[1])
+            
+            for i in range(1, len(parts) - 1):
+                pair_length = len(parts[i]) + len(parts[i + 1])
+                if pair_length < shortest_pair_length:
+                    shortest_pair_length = pair_length
+                    shortest_pair_index = i
+            
+            parts[shortest_pair_index] = parts[shortest_pair_index] + '\n\n' + parts[shortest_pair_index + 1]
+            parts.pop(shortest_pair_index + 1)
+    
+    print(f"✅ 最終分割成 {len(parts)} 個內容頁")
+    
+    return parts[:target_max_parts]
 
 def extract_keywords_from_content(content):
     """
