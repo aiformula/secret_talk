@@ -14,10 +14,12 @@ def generate_exact_custom_template(content, template_type="content", perspective
     
     # Adjust font size based on content length for better fit
     content_length = len(content)
-    if template_type == "content" and content_length > 200:
-        font_size = "42px"  # Further increased for better readability
-    elif template_type == "content" and content_length > 150:
-        font_size = "44px"  # Further increased for better readability
+    if template_type == "content" and content_length > 80:
+        font_size = "36px"  # Smaller font for longer content
+    elif template_type == "content" and content_length > 60:
+        font_size = "40px"  # Medium font for medium content
+    elif template_type == "content" and content_length > 40:
+        font_size = "44px"  # Larger font for shorter content
     
     # Choose styling based on template type with proper sizing for mobile display
     if template_type == "title":
@@ -41,7 +43,8 @@ def generate_exact_custom_template(content, template_type="content", perspective
         extra_style = "text-align: center;"
     else:  # content pages
         bg_image = "content_page1_girl.png" if perspective == "female" else "content_page1_boy.png"
-        font_size = "46px"  # Further increased for better readability
+        if 'font_size' not in locals():  # Only set if not already set above
+            font_size = "42px"  # Default font size for content pages
         font_weight = "500"
         color = "#3f3257"
         content_class = "story-content"
