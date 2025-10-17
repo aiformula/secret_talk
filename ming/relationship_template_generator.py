@@ -17,19 +17,19 @@ def generate_exact_custom_template(content, template_type="content", perspective
     # Wrap in paragraph tags
     exact_content = f'<p>{exact_content}</p>'
     
-    # Adjust font size based on content length for better fit
+    # Adjust font size based on content length for better fit (increased sizes)
     content_length = len(content)
     if template_type == "content" and content_length > 50:
-        font_size = "32px"  # Smaller font for longer content
+        font_size = "42px"  # Increased from 32px for longer content
     elif template_type == "content" and content_length > 40:
-        font_size = "36px"  # Medium font for medium content
+        font_size = "46px"  # Increased from 36px for medium content
     elif template_type == "content" and content_length > 30:
-        font_size = "40px"  # Larger font for shorter content
+        font_size = "50px"  # Increased from 40px for shorter content
     
     # Choose styling based on template type with proper sizing for mobile display
     if template_type == "title":
         bg_image = "content_page1_girl.png" if perspective == "female" else "content_page1_boy.png"
-        font_size = "52px"  # Reduced from 78px
+        font_size = "62px"  # Increased from 52px for better visibility
         font_weight = "900"
         color = "#3f3257"
         content_class = "title"
@@ -41,7 +41,7 @@ def generate_exact_custom_template(content, template_type="content", perspective
         """
     elif template_type == "conclusion":
         bg_image = "content_page1_girl.png" if perspective == "female" else "content_page1_boy.png"
-        font_size = "36px"  # Reduced from 42px
+        font_size = "46px"  # Increased from 36px for better readability
         font_weight = "700"
         color = "#8B4B91"
         content_class = "question"
@@ -49,7 +49,7 @@ def generate_exact_custom_template(content, template_type="content", perspective
     else:  # content pages
         bg_image = "content_page1_girl.png" if perspective == "female" else "content_page1_boy.png"
         if 'font_size' not in locals():  # Only set if not already set above
-            font_size = "38px"  # Default font size for content pages
+            font_size = "48px"  # Increased default font size for content pages
         font_weight = "500"
         color = "#3f3257"
         content_class = "story-content"
@@ -74,7 +74,7 @@ def generate_exact_custom_template(content, template_type="content", perspective
                 font-family: 'Noto Sans TC', sans-serif;
                 display: flex;
                 flex-direction: column;
-                justify-content: flex-start;
+                justify-content: center;
                 align-items: center;
                 position: relative;
                 box-sizing: border-box;
@@ -86,7 +86,7 @@ def generate_exact_custom_template(content, template_type="content", perspective
                 max-width: 1000px;
                 display: flex;
                 justify-content: center;
-                align-items: flex-start;
+                align-items: center;
                 z-index: 2;
                 position: relative;
                 padding: 20px 10px;
@@ -99,7 +99,7 @@ def generate_exact_custom_template(content, template_type="content", perspective
                 color: {color};
                 line-height: 1.5;
                 font-weight: {font_weight};
-                text-align: left;
+                text-align: center;
                 text-shadow: 2px 2px 4px rgba(255,255,255,0.9), -2px -2px 4px rgba(255,255,255,0.9);
                 letter-spacing: 0.5px;
                 {extra_style}

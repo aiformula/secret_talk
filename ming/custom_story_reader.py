@@ -294,8 +294,8 @@ def split_content_for_images(content, target_parts=3):
     # 移除空白部分
     parts = [part for part in parts if part.strip()]
     
-    # 控制總圖片數量少於10張（包括標題、結論、結尾圖片）
-    target_max_parts = 6  # 目標最多6個內容頁（加上標題、結論、結尾頁，總共9張圖片）
+    # 控制總圖片數量少於12張（包括標題、結論、結尾圖片）
+    target_max_parts = 9  # 目標最多9個內容頁（加上標題、結論、結尾頁，總共12張圖片）
     
     # 如果分割後部分太多，智能合併
     while len(parts) > target_max_parts:
