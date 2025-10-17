@@ -117,9 +117,10 @@ def generate_exact_custom_template(content, template_type="content", perspective
             }}
             
             .{content_class} p {{
-                margin: 0 0 15px 0;
+                margin: 0 0 25px 0;
                 padding: 0;
-                line-height: 1.6;
+                line-height: 1.7;
+                display: block;
             }}
             
             .{content_class} p:last-child {{
