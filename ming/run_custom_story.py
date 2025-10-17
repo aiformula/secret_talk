@@ -11,14 +11,25 @@ import asyncio
 from custom_story_reader import read_custom_story, validate_custom_story_format
 from relationship_template_generator import generate_exact_custom_template
 from image_generator import generate_images_from_templates
+from telegram_sender import send_telegram_photos
+from config import setup_environment
 
-def generate_custom_story_images():
+async def generate_custom_story_images():
     """
-    直接生成自定義故事圖片，不使用 OpenAI
+    直接生成自定義故事圖片，不使用 OpenAI，並發送到 Telegram
     """
     print("\n=== 📝 自定義故事圖片生成（無需 OpenAI） ===")
     
     filename = "my_custom_story.txt"
+    
+    # 初始化環境變量和 Telegram
+    try:
+        clients = setup_environment()
+        print("✅ Telegram 環境初始化成功")
+    except Exception as e:
+        print(f"⚠️ Telegram 環境初始化錯誤：{e}")
+        print("📝 將跳過 Telegram 發送，只生成圖片")
+        clients = None
     
     # 檢查檔案是否存在
     if not os.path.exists(filename):
@@ -103,17 +114,37 @@ def generate_custom_story_images():
         # 生成圖片
         print("\n=== 🖼️ 生成圖片 ===")
         
-        # 使用 asyncio 運行圖片生成
-        image_files = asyncio.run(generate_images_from_templates(templates, perspective))
+        # 使用 await 運行圖片生成
+        image_files = await generate_images_from_templates(templates, perspective)
         
         if image_files:
             print(f"✅ 成功生成 {len(image_files)} 張圖片")
             for i, img_file in enumerate(image_files, 1):
                 print(f"  📄 {i}. {os.path.abspath(img_file)}")
             
-            # 圖片生成完成
-            print("\n=== 📱 圖片生成完成 ===")
-            print("💡 圖片已成功生成，可以手動發送到 Telegram 或其他平台")
+            # 嘗試發送到 Telegram
+            if clients:
+                print("\n=== 📱 發送到 Telegram ===")
+                try:
+                    # 創建 Telegram 標題
+                    telegram_caption = f"📱 自定義故事分享\n📰 {story_data['title']}\n🎯 100% 原文保留，不做任何修改"
+                    
+                    success = await send_telegram_photos(
+                        clients['telegram_bot'], 
+                        clients['telegram_chat_id'], 
+                        image_files, 
+                        telegram_caption
+                    )
+                    if success:
+                        print("✅ 已發送到 Telegram")
+                    else:
+                        print("⚠️ Telegram 發送失敗，但圖片已成功生成")
+                except Exception as e:
+                    print(f"⚠️ Telegram 發送錯誤: {e}")
+                    print("💡 圖片已成功生成，可手動發送")
+            else:
+                print("\n=== 📱 圖片生成完成 ===")
+                print("💡 圖片已成功生成，Telegram 未配置")
             
             # 記錄生成信息
             story_data['generation_method'] = "用戶自定義故事（原文不變）"
@@ -134,4 +165,4 @@ def generate_custom_story_images():
         return False
 
 if __name__ == "__main__":
-    generate_custom_story_images()
+    asyncio.run(generate_custom_story_images())
