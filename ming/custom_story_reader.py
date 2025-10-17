@@ -207,10 +207,10 @@ def split_content_for_images(content, target_parts=3):
     paragraph_lengths = [len(p) for p in paragraphs]
     total_chars = sum(paragraph_lengths)
     
-    # 設定每頁最佳字數範圍（根據字體大小調整）
-    optimal_chars_per_page = 60   # 適合 46px 字體嘅每頁字數（減少到60字）
-    max_chars_per_page = 80       # 最大字數，超過會太擠（減少到80字）
-    min_chars_per_page = 40       # 最小字數，太少會浪費空間
+    # 設定每頁最佳字數範圍（進一步減少以確保文字不會被截斷）
+    optimal_chars_per_page = 45   # 適合顯示區域的每頁字數（進一步減少到45字）
+    max_chars_per_page = 60       # 最大字數，確保不會溢出（減少到60字）
+    min_chars_per_page = 30       # 最小字數，避免頁面太空
     
     parts = []
     current_part = []

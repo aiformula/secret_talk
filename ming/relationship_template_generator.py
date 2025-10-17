@@ -14,12 +14,12 @@ def generate_exact_custom_template(content, template_type="content", perspective
     
     # Adjust font size based on content length for better fit
     content_length = len(content)
-    if template_type == "content" and content_length > 80:
-        font_size = "36px"  # Smaller font for longer content
-    elif template_type == "content" and content_length > 60:
-        font_size = "40px"  # Medium font for medium content
+    if template_type == "content" and content_length > 50:
+        font_size = "32px"  # Smaller font for longer content
     elif template_type == "content" and content_length > 40:
-        font_size = "44px"  # Larger font for shorter content
+        font_size = "36px"  # Medium font for medium content
+    elif template_type == "content" and content_length > 30:
+        font_size = "40px"  # Larger font for shorter content
     
     # Choose styling based on template type with proper sizing for mobile display
     if template_type == "title":
@@ -44,7 +44,7 @@ def generate_exact_custom_template(content, template_type="content", perspective
     else:  # content pages
         bg_image = "content_page1_girl.png" if perspective == "female" else "content_page1_boy.png"
         if 'font_size' not in locals():  # Only set if not already set above
-            font_size = "42px"  # Default font size for content pages
+            font_size = "38px"  # Default font size for content pages
         font_weight = "500"
         color = "#3f3257"
         content_class = "story-content"
@@ -62,31 +62,32 @@ def generate_exact_custom_template(content, template_type="content", perspective
             
             #xiaohongshu-post {{
                 margin: 0;
-                padding: 30px 20px;
+                padding: 40px 20px 60px 20px;
                 width: 1080px;
                 height: 1350px;
                 background: url('https://raw.githubusercontent.com/Liuhangfung/secret_talk/main/{bg_image}') center center/cover no-repeat;
                 font-family: 'Noto Sans TC', sans-serif;
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
+                justify-content: flex-start;
                 align-items: center;
                 position: relative;
                 box-sizing: border-box;
-                overflow: visible;
+                overflow: hidden;
             }}
             
             .container {{
                 width: 100%;
-                max-width: 1040px;
+                max-width: 1000px;
                 display: flex;
                 justify-content: center;
-                align-items: center;
+                align-items: flex-start;
                 z-index: 2;
                 position: relative;
-                padding: 5px;
+                padding: 20px 10px;
                 box-sizing: border-box;
                 min-height: auto;
+                margin-top: 80px;
             }}
             
             .{content_class} {{
