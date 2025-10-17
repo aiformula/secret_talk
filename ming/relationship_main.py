@@ -354,7 +354,7 @@ async def generate_simple_content(story_concept: str = None):
             print("❌ 故事生成器不可用")
             return None
         
-        result = await generate_simple_story(story_concept)
+        result = generate_simple_story(story_concept)
         
         print("✅ 生成完成！")
         print("\n=== 📋 內容摘要 ===")

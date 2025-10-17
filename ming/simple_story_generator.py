@@ -155,8 +155,8 @@ class SimpleStoryGenerator:
             # Check if it's a region/country restriction error
             if "unsupported_country_region_territory" in error_message or "403" in error_message:
                 print("⚠️ OpenAI API 在您的地區不可用，切換到 Mock 模式")
-                import asyncio
-                return asyncio.run(generate_mock_story(story_concept))
+                from mock_story_generator import generate_mock_story_sync
+                return generate_mock_story_sync(story_concept)
             
             return {
                 "標題": "生成失敗",
@@ -211,13 +211,13 @@ def generate_simple_story(story_concept: str) -> dict:
         # Check for region restrictions
         if "unsupported_country_region_territory" in error_message or "403" in error_message:
             print("⚠️ OpenAI API 在您的地區不可用，使用 Mock 模式")
-            import asyncio
-            return asyncio.run(generate_mock_story(story_concept))
+            from mock_story_generator import generate_mock_story_sync
+            return generate_mock_story_sync(story_concept)
         
         # Other errors, still try mock mode as fallback
         print(f"⚠️ OpenAI 錯誤：{error_message}，使用 Mock 模式")
-        import asyncio
-        return asyncio.run(generate_mock_story(story_concept))
+        from mock_story_generator import generate_mock_story_sync
+        return generate_mock_story_sync(story_concept)
 
 # 測試和演示
 async def test_simple_generator():

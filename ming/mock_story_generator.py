@@ -31,6 +31,30 @@ class MockStoryGenerator:
             }
         ]
     
+    def generate_story_from_concept_sync(self, story_concept: str) -> Dict:
+        """
+        同步版本的故事生成 - 使用預設模板
+        
+        Args:
+            story_concept: 故事概念
+            
+        Returns:
+            模擬的故事內容
+        """
+        
+        # 根據故事概念選擇最合適的示範回應
+        selected_response = self._select_best_response(story_concept)
+        
+        # 添加元數據
+        result = {
+            **selected_response,
+            "原始概念": story_concept,
+            "生成方法": "Mock 模式 (同步)",
+            "說明": "這是示範內容，因為 OpenAI API 在您的地區不可用"
+        }
+        
+        return result
+    
     async def generate_story_from_concept(self, story_concept: str) -> Dict:
         """
         模擬故事生成 - 使用預設模板
@@ -73,6 +97,20 @@ class MockStoryGenerator:
             return random.choice(self.demo_responses)
 
 # 主要函數
+def generate_mock_story_sync(story_concept: str) -> Dict:
+    """
+    同步版本的模擬故事生成 - 主函數
+    
+    Args:
+        story_concept: 故事概念
+        
+    Returns:
+        模擬的故事內容
+    """
+    generator = MockStoryGenerator()
+    result = generator.generate_story_from_concept_sync(story_concept)
+    return result
+
 async def generate_mock_story(story_concept: str) -> Dict:
     """
     模擬故事生成 - 主函數
