@@ -9,8 +9,13 @@ def format_text_with_comma_linebreaks(text):
 def generate_exact_custom_template(content, template_type="content", perspective="female"):
     """Generate HTML template that preserves user's EXACT text with original beautiful design"""
     
-    # Use the EXACT content without any processing except line breaks
-    exact_content = content.replace('\n', '<br>')
+    # Use the EXACT content with proper paragraph and line break formatting
+    # First handle paragraph breaks (double line breaks)
+    exact_content = content.replace('\n\n', '</p><p>')
+    # Then handle single line breaks within paragraphs
+    exact_content = exact_content.replace('\n', '<br>')
+    # Wrap in paragraph tags
+    exact_content = f'<p>{exact_content}</p>'
     
     # Adjust font size based on content length for better fit
     content_length = len(content)
@@ -101,13 +106,24 @@ def generate_exact_custom_template(content, template_type="content", perspective
                 word-wrap: break-word;
                 overflow-wrap: break-word;
                 hyphens: auto;
-                max-width: 800px;
+                max-width: 1000px;
                 width: 100%;
-                padding: 25px;
+                padding: 12px;
                 box-sizing: border-box;
                 background: rgba(255, 255, 255, 0.1);
                 border-radius: 15px;
                 backdrop-filter: blur(5px);
+                margin: auto;
+            }}
+            
+            .{content_class} p {{
+                margin: 0 0 15px 0;
+                padding: 0;
+                line-height: 1.6;
+            }}
+            
+            .{content_class} p:last-child {{
+                margin-bottom: 0;
             }}
         </style>
     </head>
