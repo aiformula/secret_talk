@@ -212,10 +212,10 @@ def split_content_for_images(content, target_parts=3):
     paragraph_lengths = [len(p) for p in paragraphs]
     total_chars = sum(paragraph_lengths)
     
-    # 設定每頁最佳字數範圍（增加字數以避免過度分割）
-    optimal_chars_per_page = 80   # 增加到80字，避免句子被切斷
-    max_chars_per_page = 120      # 增加到120字，確保完整句子
-    min_chars_per_page = 50       # 增加到50字，確保內容充實
+    # 設定每頁最佳字數範圍（為6頁內容優化）
+    optimal_chars_per_page = 100  # 增加到100字，適合6頁分配
+    max_chars_per_page = 140      # 增加到140字，確保完整句子
+    min_chars_per_page = 70       # 增加到70字，確保內容充實
     
     parts = []
     current_part = []
@@ -303,8 +303,8 @@ def split_content_for_images(content, target_parts=3):
     # 移除空白部分
     parts = [part for part in parts if part.strip()]
     
-    # 控制總圖片數量少於12張（包括標題、結論、結尾圖片）
-    target_max_parts = 9  # 目標最多9個內容頁（加上標題、結論、結尾頁，總共12張圖片）
+    # 控制總圖片數量為9張（包括標題、結論、結尾圖片）
+    target_max_parts = 6  # 目標最多6個內容頁（加上標題、結論、結尾頁，總共9張圖片）
     
     # 如果分割後部分太多，智能合併
     while len(parts) > target_max_parts:

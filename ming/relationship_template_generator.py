@@ -17,16 +17,16 @@ def generate_exact_custom_template(content, template_type="content", perspective
     # Wrap in paragraph tags
     exact_content = f'<p>{exact_content}</p>'
     
-    # Adjust font size based on content length for better fit with increased content per page
+    # Adjust font size based on content length for 6-page optimization
     content_length = len(content)
-    if template_type == "content" and content_length > 100:
-        font_size = "36px"  # Smaller font for very long content (100+ chars)
+    if template_type == "content" and content_length > 120:
+        font_size = "32px"  # Smaller font for very long content (120+ chars)
+    elif template_type == "content" and content_length > 100:
+        font_size = "36px"  # Small font for long content (100+ chars)
     elif template_type == "content" and content_length > 80:
-        font_size = "40px"  # Medium font for long content (80+ chars)
+        font_size = "40px"  # Medium font for medium content (80+ chars)
     elif template_type == "content" and content_length > 60:
-        font_size = "44px"  # Larger font for medium content (60+ chars)
-    elif template_type == "content" and content_length > 40:
-        font_size = "48px"  # Large font for shorter content (40+ chars)
+        font_size = "44px"  # Larger font for shorter content (60+ chars)
     
     # Choose styling based on template type with proper sizing for mobile display
     if template_type == "title":
@@ -51,7 +51,7 @@ def generate_exact_custom_template(content, template_type="content", perspective
     else:  # content pages
         bg_image = "content_page1_girl.png" if perspective == "female" else "content_page1_boy.png"
         if 'font_size' not in locals():  # Only set if not already set above
-            font_size = "42px"  # Adjusted default font size for content pages with more text
+            font_size = "38px"  # Adjusted default font size for 6-page content with more text
         font_weight = "500"
         color = "#3f3257"
         content_class = "story-content"
