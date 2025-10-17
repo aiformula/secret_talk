@@ -1,0 +1,137 @@
+#!/usr/bin/env python3
+"""
+🎯 直接運行自定義故事生成（不使用 OpenAI）
+Direct custom story generation without OpenAI
+"""
+
+import os
+import sys
+import datetime
+import asyncio
+from custom_story_reader import read_custom_story, validate_custom_story_format
+from relationship_template_generator import generate_exact_custom_template
+from image_generator import generate_images_from_templates
+
+def generate_custom_story_images():
+    """
+    直接生成自定義故事圖片，不使用 OpenAI
+    """
+    print("\n=== 📝 自定義故事圖片生成（無需 OpenAI） ===")
+    
+    filename = "my_custom_story.txt"
+    
+    # 檢查檔案是否存在
+    if not os.path.exists(filename):
+        print(f"❌ 找唔到 {filename} 檔案")
+        print(f"💡 請確保 {filename} 檔案存在並包含你嘅故事內容")
+        return False
+    
+    try:
+        # 驗證故事格式
+        print("🔍 驗證故事格式...")
+        is_valid, message = validate_custom_story_format(filename)
+        if not is_valid:
+            print(f"❌ 故事格式錯誤: {message}")
+            print(f"💡 請檢查 {filename} 的格式")
+            return False
+        
+        # 讀取故事內容
+        print(f"📖 讀取故事內容 ({filename})...")
+        story_data = read_custom_story(filename)
+        
+        if 'error' in story_data:
+            print(f"❌ 讀取錯誤: {story_data['error']}")
+            print(f"💡 建議: {story_data['suggestion']}")
+            return False
+        
+        # 顯示讀取到的內容摘要
+        print("✅ 成功讀取故事")
+        print(f"📰 標題: {story_data['title']}")
+        print(f"📄 內容長度: {len(story_data['content'])} 字符")
+        print(f"❓ 結論: {story_data['conclusion']}")
+        print(f"🏷️ 關鍵詞: {', '.join(story_data['keywords'])}")
+        print("🎯 模式: 100% 原文保留，不做任何修改")
+        
+        # 使用故事數據中的視角信息
+        perspective = story_data.get('perspective', 'female')
+        
+        # 顯示視角檢測結果
+        if 'perspective_detection' in story_data:
+            detection = story_data['perspective_detection']
+            print(f"🎭 視角檢測結果:")
+            print(f"   📁 檔案名稱檢測: {detection['filename']}")
+            print(f"   📝 內容檢測: {detection['content']}")
+            print(f"   ✅ 最終選擇: {detection['final']} ({'男性視角' if detection['final'] == 'male' else '女性視角'})")
+        
+        # 生成 HTML 模板（使用原文不變模板）
+        print(f"\n=== 🎨 生成 HTML 模板（100% 原文保留，{perspective} 視角） ===")
+        
+        # 準備所有內容部分
+        content_parts = story_data['content_parts']
+        
+        templates = {
+            'title': generate_exact_custom_template(
+                story_data['title'], 
+                template_type="title",
+                perspective=perspective
+            )
+        }
+        
+        # 為每個內容部分生成模板
+        for i, content_part in enumerate(content_parts, 1):
+            if content_part.strip():  # 只處理非空內容
+                templates[f'story{i}'] = generate_exact_custom_template(
+                    content_part, 
+                    template_type="content",
+                    perspective=perspective
+                )
+        
+        # 結論模板
+        templates['conclusion'] = generate_exact_custom_template(
+            story_data['conclusion'], 
+            template_type="conclusion",
+            perspective=perspective
+        )
+        
+        # 結尾模板
+        templates['end'] = generate_exact_custom_template(
+            "完", 
+            template_type="end",
+            perspective=perspective
+        )
+        
+        # 生成圖片
+        print("\n=== 🖼️ 生成圖片 ===")
+        
+        # 使用 asyncio 運行圖片生成
+        image_files = asyncio.run(generate_images_from_templates(templates, perspective))
+        
+        if image_files:
+            print(f"✅ 成功生成 {len(image_files)} 張圖片")
+            for i, img_file in enumerate(image_files, 1):
+                print(f"  📄 {i}. {os.path.abspath(img_file)}")
+            
+            # 圖片生成完成
+            print("\n=== 📱 圖片生成完成 ===")
+            print("💡 圖片已成功生成，可以手動發送到 Telegram 或其他平台")
+            
+            # 記錄生成信息
+            story_data['generation_method'] = "用戶自定義故事（原文不變）"
+            story_data['generated_files'] = image_files
+            story_data['timestamp'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+            print(f"\n📄 生成方法: {story_data['generation_method']}")
+            print("✅ 自定義故事處理完成！")
+            return True
+        else:
+            print("❌ 沒有成功生成任何圖片")
+            return False
+            
+    except Exception as e:
+        print(f"❌ 生成過程發生錯誤: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+if __name__ == "__main__":
+    generate_custom_story_images()

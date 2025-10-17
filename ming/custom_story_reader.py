@@ -212,10 +212,10 @@ def split_content_for_images(content, target_parts=3):
     paragraph_lengths = [len(p) for p in paragraphs]
     total_chars = sum(paragraph_lengths)
     
-    # 設定每頁最佳字數範圍（進一步減少以確保文字不會被截斷）
-    optimal_chars_per_page = 45   # 適合顯示區域的每頁字數（進一步減少到45字）
-    max_chars_per_page = 60       # 最大字數，確保不會溢出（減少到60字）
-    min_chars_per_page = 30       # 最小字數，避免頁面太空
+    # 設定每頁最佳字數範圍（增加字數以避免過度分割）
+    optimal_chars_per_page = 80   # 增加到80字，避免句子被切斷
+    max_chars_per_page = 120      # 增加到120字，確保完整句子
+    min_chars_per_page = 50       # 增加到50字，確保內容充實
     
     parts = []
     current_part = []
@@ -226,15 +226,24 @@ def split_content_for_images(content, target_parts=3):
         
         # 如果單個段落太長，嘗試按句子分割（但保留完整內容）
         if paragraph_len > max_chars_per_page:
-            # 按句子分割長段落，保留所有標點符號
+            # 更智能的句子分割，保留語意完整性
             sentences = []
             temp_sentence = ""
+            
+            # 先按主要標點符號分割
             for char in paragraph:
                 temp_sentence += char
-                if char in ['。', '！', '？', '；']:
+                # 主要句子結束標點
+                if char in ['。', '！', '？']:
                     if temp_sentence.strip():
                         sentences.append(temp_sentence.strip())
                     temp_sentence = ""
+                # 次要分割點（只在句子太長時使用）
+                elif char in ['；', '，'] and len(temp_sentence) > max_chars_per_page * 0.8:
+                    if temp_sentence.strip():
+                        sentences.append(temp_sentence.strip())
+                    temp_sentence = ""
+            
             # 加入剩餘內容
             if temp_sentence.strip():
                 sentences.append(temp_sentence.strip())
