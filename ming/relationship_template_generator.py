@@ -9,22 +9,29 @@ def format_text_with_comma_linebreaks(text):
 def generate_exact_custom_template(content, template_type="content", perspective="female"):
     """Generate HTML template that preserves user's EXACT text with original beautiful design"""
     
-    # Use the EXACT content without any processing except line breaks
-    exact_content = content.replace('\n', '<br>')
+    # Use the EXACT content with proper paragraph and line break formatting
+    # First handle paragraph breaks (double line breaks)
+    exact_content = content.replace('\n\n', '</p><p>')
+    # Then handle single line breaks within paragraphs
+    exact_content = exact_content.replace('\n', '<br>')
+    # Wrap in paragraph tags
+    exact_content = f'<p>{exact_content}</p>'
     
-    # Adjust font size based on content length for better fit
+    # Adjust font size based on content length for 6-page optimization
     content_length = len(content)
-    if template_type == "content" and content_length > 50:
-        font_size = "32px"  # Smaller font for longer content
-    elif template_type == "content" and content_length > 40:
-        font_size = "36px"  # Medium font for medium content
-    elif template_type == "content" and content_length > 30:
-        font_size = "40px"  # Larger font for shorter content
+    if template_type == "content" and content_length > 120:
+        font_size = "32px"  # Smaller font for very long content (120+ chars)
+    elif template_type == "content" and content_length > 100:
+        font_size = "36px"  # Small font for long content (100+ chars)
+    elif template_type == "content" and content_length > 80:
+        font_size = "40px"  # Medium font for medium content (80+ chars)
+    elif template_type == "content" and content_length > 60:
+        font_size = "44px"  # Larger font for shorter content (60+ chars)
     
     # Choose styling based on template type with proper sizing for mobile display
     if template_type == "title":
         bg_image = "content_page1_girl.png" if perspective == "female" else "content_page1_boy.png"
-        font_size = "82px"  # Increased by 20% from 52px
+        font_size = "62px"  # Increased from 52px for better visibility
         font_weight = "900"
         color = "#3f3257"
         content_class = "title"
@@ -36,7 +43,7 @@ def generate_exact_custom_template(content, template_type="content", perspective
         """
     elif template_type == "conclusion":
         bg_image = "content_page1_girl.png" if perspective == "female" else "content_page1_boy.png"
-        font_size = "53px"  # Increased by 20% from 36px
+        font_size = "46px"  # Increased from 36px for better readability
         font_weight = "700"
         color = "#8B4B91"
         content_class = "question"
@@ -44,7 +51,7 @@ def generate_exact_custom_template(content, template_type="content", perspective
     else:  # content pages
         bg_image = "content_page1_girl.png" if perspective == "female" else "content_page1_boy.png"
         if 'font_size' not in locals():  # Only set if not already set above
-            font_size = "38px"  # Default font size for content pages
+            font_size = "38px"  # Adjusted default font size for 6-page content with more text
         font_weight = "500"
         color = "#3f3257"
         content_class = "story-content"
@@ -69,7 +76,7 @@ def generate_exact_custom_template(content, template_type="content", perspective
                 font-family: 'Noto Sans TC', sans-serif;
                 display: flex;
                 flex-direction: column;
-                justify-content: flex-start;
+                justify-content: center;
                 align-items: center;
                 position: relative;
                 box-sizing: border-box;
@@ -81,12 +88,11 @@ def generate_exact_custom_template(content, template_type="content", perspective
                 max-width: 1000px;
                 display: flex;
                 justify-content: center;
-                align-items: flex-start;
+                align-items: center;
                 z-index: 2;
                 position: relative;
                 padding: 20px 10px;
                 box-sizing: border-box;
-                min-height: auto;
                 margin-top: 80px;
             }}
             
@@ -95,14 +101,14 @@ def generate_exact_custom_template(content, template_type="content", perspective
                 color: {color};
                 line-height: 1.5;
                 font-weight: {font_weight};
-                text-align: left;
+                text-align: justify;
                 text-shadow: 2px 2px 4px rgba(255,255,255,0.9), -2px -2px 4px rgba(255,255,255,0.9);
                 letter-spacing: 0.5px;
                 {extra_style}
                 word-wrap: break-word;
                 overflow-wrap: break-word;
                 hyphens: auto;
-                max-width: 980px;
+                max-width: 1000px;
                 width: 100%;
                 padding: 12px;
                 box-sizing: border-box;
@@ -110,6 +116,17 @@ def generate_exact_custom_template(content, template_type="content", perspective
                 border-radius: 15px;
                 backdrop-filter: blur(5px);
                 margin: auto;
+            }}
+            
+            .{content_class} p {{
+                margin: 0 0 25px 0;
+                padding: 0;
+                line-height: 1.7;
+                display: block;
+            }}
+            
+            .{content_class} p:last-child {{
+                margin-bottom: 0;
             }}
         </style>
     </head>

@@ -28,7 +28,7 @@ def detect_perspective_from_filename(filename):
 
 def detect_perspective_from_content(content):
     """
-    從故事內容自動檢測視角
+    從故事內容自動檢測視角（智能版 - 考慮上下文）
     
     Args:
         content: 故事內容
@@ -36,48 +36,135 @@ def detect_perspective_from_content(content):
     Returns:
         str: "male" 或 "female"
     """
-    # 男性視角關鍵詞 (更全面的檢測)
+    male_score = 0
+    female_score = 0
+    
+    # 分割內容為行，以便分析上下文
+    lines = content.split('\n')
+    full_text = ' '.join(lines)
+    
+    # 🎯 最強指標：男朋友 vs 女朋友（優先檢測，權重最高）
+    boyfriend_count = content.count("男朋友")
+    girlfriend_count = content.count("女朋友")
+    husband_count = content.count("老公")
+    wife_count = content.count("老婆")
+    
+    # 💡 關鍵改進：檢查標題/第一句的關鍵詞（權重加倍）
+    first_line = lines[0] if lines else ""
+    title_boyfriend = first_line.count("男朋友")
+    title_girlfriend = first_line.count("女朋友")
+    title_husband = first_line.count("老公")
+    title_wife = first_line.count("老婆")
+    
+    if boyfriend_count > 0:
+        base_score = boyfriend_count * 10
+        title_bonus = title_boyfriend * 10  # 標題出現額外加分
+        female_score += base_score + title_bonus
+        print(f"   ✅ 發現 '男朋友' {boyfriend_count} 次 → 女性視角 +{base_score}" + 
+              (f" (標題加分 +{title_bonus})" if title_bonus > 0 else ""))
+    
+    if girlfriend_count > 0:
+        base_score = girlfriend_count * 10
+        title_bonus = title_girlfriend * 10
+        male_score += base_score + title_bonus
+        print(f"   ✅ 發現 '女朋友' {girlfriend_count} 次 → 男性視角 +{base_score}" +
+              (f" (標題加分 +{title_bonus})" if title_bonus > 0 else ""))
+    
+    if husband_count > 0:
+        base_score = husband_count * 10
+        title_bonus = title_husband * 10
+        female_score += base_score + title_bonus
+        print(f"   ✅ 發現 '老公' {husband_count} 次 → 女性視角 +{base_score}" +
+              (f" (標題加分 +{title_bonus})" if title_bonus > 0 else ""))
+    
+    # 💡 關鍵改進：'老婆' 的上下文分析（降低權重，因為可能是引述別人的話）
+    if wife_count > 0:
+        # 檢查是否在引號內（別人說的話）
+        quoted_wife = 0
+        for match in ['「老婆', '『老婆', '"老婆']:
+            quoted_wife += full_text.count(match)
+        
+        # 如果大部分'老婆'都在引號內，降低權重
+        if quoted_wife >= wife_count * 0.5:  # 超過一半在引號內
+            reduced_score = wife_count * 3  # 降低權重到3
+            male_score += reduced_score
+            print(f"   ⚠️ 發現 '老婆' {wife_count} 次（{quoted_wife}次在引號內）→ 男性視角 +{reduced_score} (降權)")
+        else:
+            base_score = wife_count * 10
+            title_bonus = title_wife * 10
+            male_score += base_score + title_bonus
+            print(f"   ✅ 發現 '老婆' {wife_count} 次 → 男性視角 +{base_score}" +
+                  (f" (標題加分 +{title_bonus})" if title_bonus > 0 else ""))
+    
+    # 💡 超強指標：檢查"我+關係詞"組合（最明確的視角指示）
+    my_boyfriend_patterns = ["我男朋友", "我個男朋友", "我嘅男朋友"]
+    my_girlfriend_patterns = ["我女朋友", "我個女朋友", "我嘅女朋友"]
+    my_husband_patterns = ["我老公", "我個老公", "我嘅老公"]
+    my_wife_patterns = ["我老婆", "我個老婆", "我嘅老婆"]
+    
+    my_boyfriend_count = sum(full_text.count(p) for p in my_boyfriend_patterns)
+    my_girlfriend_count = sum(full_text.count(p) for p in my_girlfriend_patterns)
+    my_husband_count = sum(full_text.count(p) for p in my_husband_patterns)
+    my_wife_count = sum(full_text.count(p) for p in my_wife_patterns)
+    
+    if my_boyfriend_count > 0:
+        super_bonus = my_boyfriend_count * 20  # 超高權重
+        female_score += super_bonus
+        print(f"   🎯 發現 '我+男朋友' {my_boyfriend_count} 次 → 女性視角 +{super_bonus} (確定性證據)")
+    
+    if my_girlfriend_count > 0:
+        super_bonus = my_girlfriend_count * 20
+        male_score += super_bonus
+        print(f"   🎯 發現 '我+女朋友' {my_girlfriend_count} 次 → 男性視角 +{super_bonus} (確定性證據)")
+    
+    if my_husband_count > 0:
+        super_bonus = my_husband_count * 20
+        female_score += super_bonus
+        print(f"   🎯 發現 '我+老公' {my_husband_count} 次 → 女性視角 +{super_bonus} (確定性證據)")
+    
+    if my_wife_count > 0:
+        super_bonus = my_wife_count * 20
+        male_score += super_bonus
+        print(f"   🎯 發現 '我+老婆' {my_wife_count} 次 → 男性視角 +{super_bonus} (確定性證據)")
+    
+    # 男性視角次要關鍵詞（較低權重）
     male_keywords = [
         # 直接稱呼
-        "兄弟", "各位兄弟", "大佬", "男仔", "做男人", "兄弟們",
+        "兄弟", "各位兄弟", "大佬", "兄弟們", "我哋男人",
         # 關係描述 (男性視角)
-        "識女仔", "女朋友", "女神", "正到不得了", "靚女", "女仔一組",
-        "我哋男人", "台灣嘅女仔", "香港嘅女朋友", "同一個女仔",
+        "識女仔", "女神", "正到不得了", "靚女", "女仔一組",
+        "台灣嘅女仔", "香港嘅女朋友", "同一個女仔",
         # 男性化表達
-        "瀨嘢", "仆街", "好對唔住", "戰友", "搞掂", "越軌",
-        "Long D", "出咗軌", "心虛", "內疚", "拖過手",
+        "瀨嘢", "仆街", "戰友", "搞掂", "越軌",
+        "Long D", "出咗軌", "心虛", "內疚",
         # 男性特有情境
         "宿舍房", "mid-term presentation", "做project"
     ]
     
-    # 女性視角關鍵詞  
+    # 女性視角次要關鍵詞（較低權重）
     female_keywords = [
         # 直接稱呼
-        "絲打", "各位絲打", "姐妹", "女仔", "做女人", "姐妹們",
+        "絲打", "各位絲打", "姐妹", "姐妹們", "我哋女人", "港女", "姨姨", "女仔們",
         # 關係描述 (女性視角)
-        "識男仔", "男朋友", "男神", "靚仔", "型男", "男仔一組",
-        "我哋女人", "台灣嘅男仔", "香港嘅男朋友", "同一個男仔",
+        "識男仔", "男神", "靚仔", "型男", "男仔一組",
+        "台灣嘅男仔", "香港嘅男朋友", "同一個男仔",
         # 女性化表達
-        "好心動", "好sweet", "好romantic", "好溫柔"
+        "好心動", "好sweet", "好romantic", "好溫柔", "師姐",
+        # 女性勸告/建議場景 (明顯女性視角)
+        "奉勸未婚嘅女仔", "想奉勸", "個男仔都好孝順", "娶我", "要戒指",
+        "放女朋友第一位"
     ]
     
-    # 計算關鍵詞出現次數
-    male_score = sum(1 for keyword in male_keywords if keyword in content)
-    female_score = sum(1 for keyword in female_keywords if keyword in content)
+    # 計算次要關鍵詞出現次數（權重1）
+    male_secondary = sum(1 for keyword in male_keywords if keyword in content)
+    female_secondary = sum(1 for keyword in female_keywords if keyword in content)
     
-    # 額外檢查：如果內容提到"女朋友"而不是"男朋友"，很可能是男性視角
-    if "女朋友" in content and "男朋友" not in content:
-        male_score += 3
-    elif "男朋友" in content and "女朋友" not in content:
-        female_score += 3
-    
-    # 檢查Long D (遠距離戀愛) - 通常男性會這樣說
-    if "Long D" in content or "long d" in content.lower():
-        male_score += 2
+    male_score += male_secondary
+    female_score += female_secondary
     
     print(f"🔍 內容檢測詳情:")
-    print(f"   男性關鍵詞得分: {male_score}")
-    print(f"   女性關鍵詞得分: {female_score}")
+    print(f"   男性關鍵詞得分: {male_score} (主要指標 + 次要關鍵詞)")
+    print(f"   女性關鍵詞得分: {female_score} (主要指標 + 次要關鍵詞)")
     
     if male_score > female_score:
         return "male"
@@ -195,22 +282,27 @@ def read_custom_story(filename="my_custom_story.txt"):
 def split_content_for_images(content, target_parts=3):
     """
     將內容分割做指定數量嘅部分（用於生成多張圖片）
-    智能分割，確保每頁內容適中，唔會太擠
+    盡量保持每部分長度相近，但唔會打斷句子
     """
     # 按段落分割
     paragraphs = [p.strip() for p in content.split('\n\n') if p.strip()]
     
-    if not paragraphs:
-        return ["", "", ""]
+    if len(paragraphs) <= target_parts:
+        # 如果段落數少於或等於目標部分數，每個段落一部分
+        parts = paragraphs[:]
+        # 如果唔夠3部分，用空字符串補足
+        while len(parts) < target_parts:
+            parts.append("")
+        return parts[:target_parts]
     
     # 計算每個段落嘅字數
     paragraph_lengths = [len(p) for p in paragraphs]
     total_chars = sum(paragraph_lengths)
     
-    # 設定每頁最佳字數範圍（進一步減少以確保文字不會被截斷）
-    optimal_chars_per_page = 45   # 適合顯示區域的每頁字數（進一步減少到45字）
-    max_chars_per_page = 60       # 最大字數，確保不會溢出（減少到60字）
-    min_chars_per_page = 30       # 最小字數，避免頁面太空
+    # 設定每頁最佳字數範圍（為6頁內容優化）
+    optimal_chars_per_page = 100  # 增加到100字，適合6頁分配
+    max_chars_per_page = 140      # 增加到140字，確保完整句子
+    min_chars_per_page = 70       # 增加到70字，確保內容充實
     
     parts = []
     current_part = []
@@ -221,15 +313,24 @@ def split_content_for_images(content, target_parts=3):
         
         # 如果單個段落太長，嘗試按句子分割（但保留完整內容）
         if paragraph_len > max_chars_per_page:
-            # 按句子分割長段落，保留所有標點符號
+            # 更智能的句子分割，保留語意完整性
             sentences = []
             temp_sentence = ""
+            
+            # 先按主要標點符號分割
             for char in paragraph:
                 temp_sentence += char
-                if char in ['。', '！', '？', '；']:
+                # 主要句子結束標點
+                if char in ['。', '！', '？']:
                     if temp_sentence.strip():
                         sentences.append(temp_sentence.strip())
                     temp_sentence = ""
+                # 次要分割點（只在句子太長時使用）
+                elif char in ['；', '，'] and len(temp_sentence) > max_chars_per_page * 0.8:
+                    if temp_sentence.strip():
+                        sentences.append(temp_sentence.strip())
+                    temp_sentence = ""
+            
             # 加入剩餘內容
             if temp_sentence.strip():
                 sentences.append(temp_sentence.strip())
@@ -289,7 +390,7 @@ def split_content_for_images(content, target_parts=3):
     # 移除空白部分
     parts = [part for part in parts if part.strip()]
     
-    # 控制總圖片數量少於10張（包括標題、結論、結尾圖片）
+    # 控制總圖片數量為9張（包括標題、結論、結尾圖片）
     target_max_parts = 6  # 目標最多6個內容頁（加上標題、結論、結尾頁，總共9張圖片）
     
     # 如果分割後部分太多，智能合併
@@ -297,41 +398,37 @@ def split_content_for_images(content, target_parts=3):
         print(f"📄 內容分割成 {len(parts)} 頁，正在優化到 {target_max_parts} 頁以內...")
         
         # 搵最短嘅兩個相鄰部分合併
-        min_combined_len = float('inf')
-        merge_index = 0
+        min_combined_length = float('inf')
+        merge_index = -1
         
         for i in range(len(parts) - 1):
-            combined_len = len(parts[i]) + len(parts[i + 1])
-            # 確保合併後唔會超過合理長度
-            if combined_len < min_combined_len and combined_len <= max_chars_per_page * 1.3:
-                min_combined_len = combined_len
+            combined_length = len(parts[i]) + len(parts[i + 1])
+            if combined_length < min_combined_length and combined_length <= max_chars_per_page * 1.5:
+                min_combined_length = combined_length
                 merge_index = i
         
-        # 如果搵唔到合適嘅合併對象，就合併最短嘅
-        if min_combined_len == float('inf'):
-            # 搵最短嘅部分
-            min_len = min(len(part) for part in parts)
-            for i in range(len(parts) - 1):
-                if len(parts[i]) == min_len:
-                    merge_index = i
-                    break
-        
-        # 合併
-        parts[merge_index] = parts[merge_index] + '\n\n' + parts[merge_index + 1]
-        parts.pop(merge_index + 1)
+        # 如果搵到合適嘅合併位置
+        if merge_index != -1:
+            # 合併兩個部分
+            parts[merge_index] = parts[merge_index] + '\n\n' + parts[merge_index + 1]
+            parts.pop(merge_index + 1)
+        else:
+            # 如果搵唔到合適嘅合併，強制合併最短嘅兩個相鄰部分
+            shortest_pair_index = 0
+            shortest_pair_length = len(parts[0]) + len(parts[1])
+            
+            for i in range(1, len(parts) - 1):
+                pair_length = len(parts[i]) + len(parts[i + 1])
+                if pair_length < shortest_pair_length:
+                    shortest_pair_length = pair_length
+                    shortest_pair_index = i
+            
+            parts[shortest_pair_index] = parts[shortest_pair_index] + '\n\n' + parts[shortest_pair_index + 1]
+            parts.pop(shortest_pair_index + 1)
     
     print(f"✅ 最終分割成 {len(parts)} 個內容頁")
     
-    # 確保至少有一部分
-    if not parts:
-        parts = [content]
-    
-    # 唔再強制3個部分，保留所有分割結果
-    # 確保至少有1個部分
-    if len(parts) == 0:
-        parts = [content if content.strip() else "【內容】"]
-    
-    return parts
+    return parts[:target_max_parts]
 
 def extract_keywords_from_content(content):
     """
@@ -381,6 +478,62 @@ def validate_custom_story_format(filename="my_custom_story.txt"):
     except Exception as e:
         return False, f"驗證時發生錯誤: {str(e)}"
 
+def verify_story_perspective(filename="my_custom_story.txt"):
+    """
+    驗證並詳細顯示故事視角檢測結果
+    """
+    print(f"\n=== 🔍 視角檢測驗證工具 ===")
+    print(f"📁 檔案: {filename}\n")
+    
+    story = read_custom_story(filename)
+    
+    if 'error' in story:
+        print(f"❌ 錯誤: {story['error']}")
+        print(f"💡 建議: {story['suggestion']}")
+        return
+    
+    print(f"📰 標題: {story['title']}")
+    print(f"📄 內容長度: {len(story['content'])} 字符\n")
+    
+    # 顯示視角檢測詳情
+    if 'perspective_detection' in story:
+        detection = story['perspective_detection']
+        print(f"🎭 視角檢測詳情:")
+        print(f"   1️⃣ 檔案名稱檢測: {detection['filename']} ({'👨 男性' if detection['filename'] == 'male' else '👩 女性'})")
+        print(f"   2️⃣ 內容分析檢測: {detection['content']} ({'👨 男性' if detection['content'] == 'male' else '👩 女性'})")
+        print(f"   3️⃣ 最終決定: {detection['final']} ({'👨‍💼 男性視角' if detection['final'] == 'male' else '👩‍💼 女性視角'})\n")
+    
+    # 顯示關鍵證據
+    print(f"🔍 關鍵詞分析:")
+    boyfriend_count = story['content'].count('男朋友') + story['title'].count('男朋友')
+    girlfriend_count = story['content'].count('女朋友') + story['title'].count('女朋友')
+    husband_count = story['content'].count('老公') + story['title'].count('老公')
+    wife_count = story['content'].count('老婆') + story['title'].count('老婆')
+    
+    if boyfriend_count > 0:
+        print(f"   ✅ '男朋友' 出現 {boyfriend_count} 次 → 女性視角證據")
+    if girlfriend_count > 0:
+        print(f"   ✅ '女朋友' 出現 {girlfriend_count} 次 → 男性視角證據")
+    if husband_count > 0:
+        print(f"   ✅ '老公' 出現 {husband_count} 次 → 女性視角證據")
+    if wife_count > 0:
+        print(f"   ✅ '老婆' 出現 {wife_count} 次 → 男性視角證據")
+    
+    total_female_evidence = boyfriend_count + husband_count
+    total_male_evidence = girlfriend_count + wife_count
+    
+    print(f"\n📊 證據統計:")
+    print(f"   👩 女性視角證據: {total_female_evidence} 個關鍵詞")
+    print(f"   👨 男性視角證據: {total_male_evidence} 個關鍵詞")
+    
+    final_perspective = story.get('perspective', 'unknown')
+    if final_perspective == 'female':
+        print(f"\n✅ 結論: 這是一個 👩‍💼 女性視角 (Girl View) 的故事")
+    elif final_perspective == 'male':
+        print(f"\n✅ 結論: 這是一個 👨‍💼 男性視角 (Boy View) 的故事")
+    else:
+        print(f"\n⚠️ 結論: 無法確定視角")
+
 if __name__ == "__main__":
     # 測試功能
     print("=== 🎭 自定義故事讀取器測試 ===")
@@ -395,4 +548,8 @@ if __name__ == "__main__":
         print(f"📄 內容長度: {len(story['content'])} 字符")
         print(f"📝 內容部分數: {len(story['content_parts'])}")
         print(f"❓ 結論: {story['conclusion']}")
-        print(f"🏷️ 關鍵詞: {', '.join(story['keywords'])}") 
+        print(f"🏷️ 關鍵詞: {', '.join(story['keywords'])}")
+        
+        # 運行視角驗證
+        print("\n" + "="*50)
+        verify_story_perspective() 

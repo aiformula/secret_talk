@@ -133,3 +133,69 @@ async def send_telegram_photos(telegram_bot, telegram_chat_id, photo_paths: list
         print("🔍 詳細錯誤資訊:")
         print(traceback.format_exc())
         return False
+
+async def send_telegram_photos_batched(telegram_bot, telegram_chat_id, photo_paths: list, caption: str = None):
+    """Send multiple photos to Telegram, splitting into batches if needed (max 10 per album)."""
+    try:
+        # Check if all files exist
+        for path in photo_paths:
+            if not os.path.exists(path):
+                print(f"❌ File not found: {path}")
+                return False
+
+        print(f"📤 開始上傳 {len(photo_paths)} 張圖片到 Telegram...")
+        
+        # Check file sizes first
+        total_size = check_file_sizes(photo_paths)
+        
+        # Telegram album limit is 10 photos
+        MAX_PHOTOS_PER_ALBUM = 10
+        
+        if len(photo_paths) <= MAX_PHOTOS_PER_ALBUM:
+            # Send all photos in one album using existing function
+            return await send_telegram_photos(telegram_bot, telegram_chat_id, photo_paths, caption)
+        else:
+            # Split into multiple albums
+            print(f"📊 圖片數量 ({len(photo_paths)}) 超過 Telegram 限制 ({MAX_PHOTOS_PER_ALBUM})，將分批發送...")
+            
+            success_count = 0
+            total_batches = (len(photo_paths) + MAX_PHOTOS_PER_ALBUM - 1) // MAX_PHOTOS_PER_ALBUM
+            
+            for i in range(0, len(photo_paths), MAX_PHOTOS_PER_ALBUM):
+                batch_photos = photo_paths[i:i + MAX_PHOTOS_PER_ALBUM]
+                batch_num = (i // MAX_PHOTOS_PER_ALBUM) + 1
+                
+                print(f"\n📦 發送第 {batch_num}/{total_batches} 批 ({len(batch_photos)} 張圖片)...")
+                
+                # Add batch info to caption for first batch only
+                batch_caption = None
+                if i == 0 and caption:
+                    batch_caption = f"{caption}\n\n📊 總共 {len(photo_paths)} 張圖片，分 {total_batches} 批發送"
+                elif i == 0:
+                    batch_caption = f"📊 總共 {len(photo_paths)} 張圖片，分 {total_batches} 批發送"
+                
+                success = await send_telegram_photos(telegram_bot, telegram_chat_id, batch_photos, batch_caption)
+                if success:
+                    success_count += 1
+                    print(f"✅ 第 {batch_num} 批發送成功")
+                else:
+                    print(f"❌ 第 {batch_num} 批發送失敗")
+                
+                # Add small delay between batches to avoid rate limiting
+                if i + MAX_PHOTOS_PER_ALBUM < len(photo_paths):
+                    import asyncio
+                    await asyncio.sleep(2)
+            
+            if success_count == total_batches:
+                print(f"🎉 所有 {total_batches} 批圖片都發送成功！")
+                return True
+            else:
+                print(f"⚠️ 只有 {success_count}/{total_batches} 批發送成功")
+                return False
+            
+    except Exception as e:
+        print(f"❌ Telegram 分批發送失敗: {e}")
+        print("🔍 詳細錯誤資訊:")
+        import traceback
+        traceback.print_exc()
+        return False
