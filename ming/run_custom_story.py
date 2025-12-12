@@ -20,7 +20,31 @@ async def generate_custom_story_images():
     """
     print("\n=== 📝 自定義故事圖片生成（無需 OpenAI） ===")
     
+    # 🔍 智能路徑檢測：先檢查當前目錄，再檢查父目錄
     filename = "my_custom_story.txt"
+    possible_paths = [
+        filename,  # 當前目錄
+        os.path.join("..", filename),  # 父目錄
+        os.path.join(os.path.dirname(os.path.dirname(__file__)), filename)  # 腳本父目錄
+    ]
+    
+    # 找到第一個存在的檔案
+    actual_file = None
+    for path in possible_paths:
+        if os.path.exists(path):
+            actual_file = path
+            print(f"✅ 找到故事檔案：{os.path.abspath(path)}")
+            break
+    
+    if not actual_file:
+        print(f"❌ 找唔到 {filename} 檔案")
+        print(f"💡 已搜尋以下位置:")
+        for path in possible_paths:
+            print(f"   - {os.path.abspath(path)}")
+        print(f"💡 請確保 {filename} 檔案存在並包含你嘅故事內容")
+        return False
+    
+    filename = actual_file  # 使用找到的檔案路徑
     
     # 初始化環境變量和 Telegram
     try:
@@ -30,12 +54,6 @@ async def generate_custom_story_images():
         print(f"⚠️ Telegram 環境初始化錯誤：{e}")
         print("📝 將跳過 Telegram 發送，只生成圖片")
         clients = None
-    
-    # 檢查檔案是否存在
-    if not os.path.exists(filename):
-        print(f"❌ 找唔到 {filename} 檔案")
-        print(f"💡 請確保 {filename} 檔案存在並包含你嘅故事內容")
-        return False
     
     try:
         # 驗證故事格式
@@ -67,12 +85,20 @@ async def generate_custom_story_images():
         perspective = story_data.get('perspective', 'female')
         
         # 顯示視角檢測結果
+        print(f"\n🎭 視角檢測結果:")
         if 'perspective_detection' in story_data:
             detection = story_data['perspective_detection']
-            print(f"🎭 視角檢測結果:")
-            print(f"   📁 檔案名稱檢測: {detection['filename']}")
-            print(f"   📝 內容檢測: {detection['content']}")
-            print(f"   ✅ 最終選擇: {detection['final']} ({'男性視角' if detection['final'] == 'male' else '女性視角'})")
+            print(f"   📁 檔案名稱檢測: {detection['filename']} ({'👨 男' if detection['filename'] == 'male' else '👩 女'})")
+            print(f"   📝 內容檢測: {detection['content']} ({'👨 男' if detection['content'] == 'male' else '👩 女'})")
+            print(f"   ✅ 最終選擇: {detection['final']} ({'👨‍💼 男性視角 (Boy View)' if detection['final'] == 'male' else '👩‍💼 女性視角 (Girl View)'})")
+        else:
+            print(f"   ✅ 使用預設: {perspective} ({'👨‍💼 男性視角 (Boy View)' if perspective == 'male' else '👩‍💼 女性視角 (Girl View)'})")
+        
+        # 額外驗證：顯示關鍵證據
+        if '男朋友' in story_data['content'] or '男朋友' in story_data['title']:
+            print(f"   🔍 證據: 發現「男朋友」→ 確認為女性視角 ✓")
+        elif '女朋友' in story_data['content'] or '女朋友' in story_data['title']:
+            print(f"   🔍 證據: 發現「女朋友」→ 確認為男性視角 ✓")
         
         # 生成 HTML 模板（使用原文不變模板）
         print(f"\n=== 🎨 生成 HTML 模板（100% 原文保留，{perspective} 視角） ===")

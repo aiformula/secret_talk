@@ -1,0 +1,7 @@
+openai>=1.0.0
+python-telegram-bot>=20.0
+playwright>=1.40.0
+python-dotenv>=1.0.0
+notion-client>=2.0.0
+asyncio
+pathlib
