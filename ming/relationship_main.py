@@ -726,27 +726,45 @@ async def generate_custom_story_with_file(filename):
         clients = None
     
     # 🔍 智能路徑檢測：先檢查當前目錄，再檢查父目錄
+    # 擴展搜尋路徑，包括更多可能的位置
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    current_dir = os.getcwd()
+    parent_dir = os.path.dirname(current_dir)
+    root_dir = os.path.dirname(os.path.dirname(script_dir)) if os.path.dirname(script_dir) else current_dir
+    
     possible_paths = [
         filename,  # 當前目錄
         os.path.join("..", filename),  # 父目錄
-        os.path.join(os.path.dirname(os.path.dirname(__file__)), filename)  # 腳本父目錄
+        os.path.join(current_dir, filename),  # 當前工作目錄
+        os.path.join(parent_dir, filename),  # 父目錄（絕對路徑）
+        os.path.join(root_dir, filename),  # 根目錄
+        os.path.join(script_dir, filename),  # 腳本所在目錄
+        os.path.join(script_dir, "..", filename),  # 腳本父目錄
+        os.path.join(os.path.dirname(os.path.dirname(__file__)), filename) if __file__ else filename  # 腳本父目錄
     ]
     
-    # 找到第一個存在的檔案
-    actual_file = None
+    # 去重並找到第一個存在的檔案（優先使用最新修改的）
+    existing_paths = []
     for path in possible_paths:
-        if os.path.exists(path):
-            actual_file = path
-            print(f"✅ 找到故事檔案：{os.path.abspath(path)}")
-            break
+        abs_path = os.path.abspath(path)
+        if os.path.exists(abs_path) and abs_path not in [p[0] for p in existing_paths]:
+            mtime = os.path.getmtime(abs_path)
+            existing_paths.append((abs_path, mtime))
     
-    if not actual_file:
+    if not existing_paths:
         print(f"⚠️ 找唔到 {filename} 檔案")
         print(f"💡 已搜尋以下位置:")
-        for path in possible_paths:
+        for path in possible_paths[:5]:  # 只顯示前5個
             print(f"   - {os.path.abspath(path)}")
         print(f"💡 請確保 {filename} 檔案存在並包含你嘅故事內容")
         return
+    
+    # 選擇最新修改的檔案
+    existing_paths.sort(key=lambda x: x[1], reverse=True)
+    actual_file = existing_paths[0][0]
+    
+    print(f"✅ 找到故事檔案：{actual_file}")
+    print(f"📅 檔案修改時間：{datetime.datetime.fromtimestamp(existing_paths[0][1]).strftime('%Y-%m-%d %H:%M:%S')}")
     
     filename = actual_file  # 使用找到的檔案路徑
     
@@ -769,12 +787,21 @@ async def generate_custom_story_with_file(filename):
             return
         
         # 顯示讀取到的內容摘要
-        print("✅ 成功讀取故事")
+        print("\n✅ 成功讀取故事")
+        print("=" * 60)
         print(f"📰 標題: {story_data['title']}")
         print(f"📄 內容長度: {len(story_data['content'])} 字符")
+        print(f"📝 內容部分數: {len(story_data.get('content_parts', []))} 頁")
         print(f"❓ 結論: {story_data['conclusion']}")
-        print(f"🏷️ 關鍵詞: {', '.join(story_data['keywords'])}")
+        print(f"🏷️ 關鍵詞: {', '.join(story_data['keywords']) if story_data['keywords'] else '無'}")
         print("🎯 模式: 100% 原文保留，不做任何修改")
+        print("=" * 60)
+        
+        # 顯示內容預覽（前200字符）
+        content_preview = story_data['content'][:200]
+        if len(story_data['content']) > 200:
+            content_preview += "..."
+        print(f"\n📖 內容預覽:\n{content_preview}\n")
         
         # 生成時間戳
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")

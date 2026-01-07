@@ -7,6 +7,7 @@
 
 import os
 import re
+import datetime
 
 def detect_perspective_from_filename(filename):
     """
@@ -49,6 +50,14 @@ def detect_perspective_from_content(content):
     husband_count = content.count("老公")
     wife_count = content.count("老婆")
     
+    # 💡 關鍵改進：檢查「男朋友」是否在第三人稱上下文中（男性視角討論別人）
+    # 如果「男朋友」出現在「啲女仔同男朋友」、「女仔嘅男朋友」等上下文中，降低權重
+    third_person_boyfriend_patterns = [
+        "啲女仔同男朋友", "女仔同男朋友", "女仔嘅男朋友", "女仔的男朋友",
+        "見到男朋友", "發現男朋友", "男朋友同", "男朋友喺"
+    ]
+    third_person_boyfriend_count = sum(full_text.count(p) for p in third_person_boyfriend_patterns)
+    
     # 💡 關鍵改進：檢查標題/第一句的關鍵詞（權重加倍）
     first_line = lines[0] if lines else ""
     title_boyfriend = first_line.count("男朋友")
@@ -57,11 +66,19 @@ def detect_perspective_from_content(content):
     title_wife = first_line.count("老婆")
     
     if boyfriend_count > 0:
-        base_score = boyfriend_count * 10
-        title_bonus = title_boyfriend * 10  # 標題出現額外加分
-        female_score += base_score + title_bonus
-        print(f"   ✅ 發現 '男朋友' {boyfriend_count} 次 → 女性視角 +{base_score}" + 
-              (f" (標題加分 +{title_bonus})" if title_bonus > 0 else ""))
+        # 如果「男朋友」出現在第三人稱上下文中，降低權重
+        if third_person_boyfriend_count > 0:
+            # 第三人稱上下文中的「男朋友」權重降低（可能是男性視角在討論別人）
+            reduced_score = boyfriend_count * 3  # 降低權重到3
+            female_score += reduced_score
+            print(f"   ⚠️ 發現 '男朋友' {boyfriend_count} 次（{third_person_boyfriend_count}次在第三人稱上下文）→ 女性視角 +{reduced_score} (降權，可能是男性視角討論別人)")
+        else:
+            # 第一人稱「男朋友」，正常權重
+            base_score = boyfriend_count * 10
+            title_bonus = title_boyfriend * 10  # 標題出現額外加分
+            female_score += base_score + title_bonus
+            print(f"   ✅ 發現 '男朋友' {boyfriend_count} 次 → 女性視角 +{base_score}" + 
+                  (f" (標題加分 +{title_bonus})" if title_bonus > 0 else ""))
     
     if girlfriend_count > 0:
         base_score = girlfriend_count * 10
@@ -130,7 +147,7 @@ def detect_perspective_from_content(content):
     # 男性視角次要關鍵詞（較低權重）
     male_keywords = [
         # 直接稱呼
-        "兄弟", "各位兄弟", "大佬", "兄弟們", "我哋男人",
+        "兄弟", "各位兄弟", "大佬", "兄弟們", "我哋男人", "小弟",
         # 關係描述 (男性視角)
         "識女仔", "女神", "正到不得了", "靚女", "女仔一組",
         "台灣嘅女仔", "香港嘅女朋友", "同一個女仔",
@@ -138,7 +155,11 @@ def detect_perspective_from_content(content):
         "瀨嘢", "仆街", "戰友", "搞掂", "越軌",
         "Long D", "出咗軌", "心虛", "內疚",
         # 男性特有情境
-        "宿舍房", "mid-term presentation", "做project"
+        "宿舍房", "mid-term presentation", "做project",
+        # 男性視角特有表達
+        "好男人", "搵到錢", "年薪", "有車有樓", "操大隻",
+        "憑實力單身", "基層", "破處", "叫雞", "未畀人搞過",
+        "時間管理大師", "溝", "霸住"
     ]
     
     # 女性視角次要關鍵詞（較低權重）
@@ -158,6 +179,13 @@ def detect_perspective_from_content(content):
     # 計算次要關鍵詞出現次數（權重1）
     male_secondary = sum(1 for keyword in male_keywords if keyword in content)
     female_secondary = sum(1 for keyword in female_keywords if keyword in content)
+    
+    # 💡 關鍵改進：如果發現強烈的男性視角關鍵詞，給予額外加分
+    strong_male_indicators = ["小弟", "識女仔", "好男人", "破處", "叫雞", "憑實力單身", "基層", "搵到錢", "年薪"]
+    strong_male_count = sum(1 for indicator in strong_male_indicators if indicator in content)
+    if strong_male_count >= 3:  # 如果發現3個或以上強烈男性指標
+        male_score += strong_male_count * 5  # 額外加分
+        print(f"   🎯 發現 {strong_male_count} 個強烈男性視角指標 → 男性視角 +{strong_male_count * 5} (強烈證據)")
     
     male_score += male_secondary
     female_score += female_secondary
@@ -193,13 +221,25 @@ def read_custom_story(filename="my_custom_story.txt"):
         }
     """
     try:
-        if not os.path.exists(filename):
-            raise FileNotFoundError(f"找唔到檔案: {filename}")
-            
-        with open(filename, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
+        # 確保使用絕對路徑，避免路徑問題
+        abs_filename = os.path.abspath(filename)
         
-        # 過濾掉註釋同空行
+        if not os.path.exists(abs_filename):
+            raise FileNotFoundError(f"找唔到檔案: {abs_filename}")
+        
+        # 顯示文件信息（用於調試）
+        file_mtime = os.path.getmtime(abs_filename)
+        file_size = os.path.getsize(abs_filename)
+        print(f"📄 讀取檔案：{abs_filename}")
+        print(f"📅 檔案大小：{file_size} 字節")
+        print(f"🕐 最後修改：{datetime.datetime.fromtimestamp(file_mtime).strftime('%Y-%m-%d %H:%M:%S')}")
+        
+        # 強制重新讀取文件（不使用緩存）
+        with open(abs_filename, 'r', encoding='utf-8') as f:
+            raw_content = f.read()
+            lines = raw_content.splitlines()
+        
+        # 過濾掉註釋同空行（但保留段落結構）
         content_lines = []
         for line in lines:
             line = line.strip()
@@ -208,7 +248,7 @@ def read_custom_story(filename="my_custom_story.txt"):
                 content_lines.append(line)
         
         if len(content_lines) < 3:
-            raise ValueError("故事內容太短，至少需要標題、內容、結尾")
+            raise ValueError(f"故事內容太短，至少需要標題、內容、結尾（目前只有 {len(content_lines)} 行）")
         
         # 第一行係標題
         title = content_lines[0].strip()
@@ -216,8 +256,34 @@ def read_custom_story(filename="my_custom_story.txt"):
         # 最後一行係結尾
         conclusion = content_lines[-1].strip()
         
-        # 中間係主要內容
-        main_content = '\n\n'.join(content_lines[1:-1]).strip()
+        # 中間係主要內容（保留段落結構）
+        # 使用原始內容，但只取中間部分
+        raw_lines = raw_content.splitlines()
+        non_empty_raw_lines = [line.strip() for line in raw_lines if line.strip() and not line.strip().startswith('#') and not line.strip().startswith('[')]
+        
+        if len(non_empty_raw_lines) >= 3:
+            # 找到標題和結論在原始內容中的位置
+            title_line_idx = None
+            conclusion_line_idx = None
+            
+            for i, line in enumerate(raw_lines):
+                stripped = line.strip()
+                if stripped and not stripped.startswith('#') and not stripped.startswith('['):
+                    if title_line_idx is None and stripped == title:
+                        title_line_idx = i
+                    if stripped == conclusion:
+                        conclusion_line_idx = i
+            
+            # 提取中間內容（保留原始格式）
+            if title_line_idx is not None and conclusion_line_idx is not None and conclusion_line_idx > title_line_idx:
+                middle_lines = raw_lines[title_line_idx + 1:conclusion_line_idx]
+                main_content = '\n'.join(middle_lines).strip()
+            else:
+                # 如果找不到，使用備用方法
+                main_content = '\n\n'.join(content_lines[1:-1]).strip()
+        else:
+            # 備用方法：直接連接中間行
+            main_content = '\n\n'.join(content_lines[1:-1]).strip()
         
         # 分割內容做3部分（用於生成圖片）
         content_parts = split_content_for_images(main_content)
